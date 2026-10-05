@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Defender: Hell Zombie</title>
+    <style>
+        :root {
+            --primary: #8b0000;
+            --primary-hover: #a52a2a;
+            --bg-color: #111;
+            --text-color: #eee;
+            --panel-bg: rgba(20, 20, 25, 0.95);
+            --gold: #ffd700;
+            --parchment: #f4e4b5;
+            --wood-border: #8b5a2b;
+            --ink: #4a2f1d;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            user-select: none;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 1024px;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+            border: 4px solid #222;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 30px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .stat-box {
+            background: var(--parchment);
+            border: 4px solid #c89f59;
+            outline: 2px solid var(--wood-border);
+            padding: 8px 25px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--ink);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(180, 130, 60, 0.3);
+            text-shadow: none;
+        }
+
+        .stat-box span {
+            color: #8b0000;
+            font-size: 1.6rem;
+            margin-top: 5px;
+        }
+
+        #ui-hp {
+            color: #ff2222 !important;
+            letter-spacing: 2px;
+            font-size: 1.5rem !important;
+        }
+
+        #skill-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            pointer-events: auto;
+        }
+
+        #combo-text {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px black;
+            font-weight: bold;
+        }
+
+        .skill-btn {
+            background: var(--parchment);
+            color: #888;
+            border: 4px solid #a88250;
+            outline: 2px solid var(--wood-border);
+            padding: 12px 30px;
+            font-size: 1.3rem;
+            border-radius: 4px;
+            cursor: not-allowed;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.6);
+            text-shadow: none;
+            font-family: inherit;
+        }
+
+        .skill-btn.ready {
+            color: var(--primary);
+            border-color: #ffd700;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), inset 0 0 15px rgba(255,215,0,0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        .skill-btn.ready:hover {
+            transform: scale(1.05);
+            background: #fff8dc;
+        }
+
+        .skill-btn.ready:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 1); }
+            100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            border: 2px solid #666;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 1), 0 0 20px rgba(139, 0, 0, 0.6);
+            max-width: 550px;
+            width: 90%;
+            pointer-events: auto;
+        }
+
+        .modal-title {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(139, 0, 0, 0.8);
+            font-weight: bold;
+        }
+
+        #math-equation {
+            font-size: 3.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 25px 0;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .option-btn {
+            background: linear-gradient(to bottom, #444, #222);
+            color: white;
+            border: 2px solid #777;
+            padding: 20px;
+            font-size: 1.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .option-btn:hover {
+            background: linear-gradient(to bottom, #555, #333);
+            border-color: var(--gold);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to bottom, var(--primary), #5a0000);
+            color: white;
+            border: 1px solid #ff4444;
+            padding: 15px 40px;
+            font-size: 1.4rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 25px;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, var(--primary-hover), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(139, 0, 0, 0.6);
+        }
+
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            text-shadow: 2px 2px 4px black, 0 0 5px white;
+            z-index: 50;
+        }
+        
+        .dmg-text { color: #ffaa00; }
+        .dmg-player { color: #ff0000; font-size: 2.5rem; text-shadow: 0 0 10px red, 2px 2px 5px black; }
+        .heal-text { color: #ff3333; font-size: 2rem; text-shadow: 0 0 10px pink, 2px 2px 5px black; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1.3); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="1024" height="576"></canvas>
+        
+        <div id="ui-layer">
+            <div class="stat-box">
+                生命值
+                <span id="ui-hp">❤️❤️❤️</span>
+            </div>
+            <div class="stat-box">
+                分數
+                <span id="ui-score">0</span>
+            </div>
+            <div class="stat-box">
+                弓箭傷害
+                <span id="ui-dmg">20</span>
+            </div>
+        </div>
+
+        <div id="skill-container">
+            <div id="combo-text">連續答對: 0/3</div>
+            <button id="skill-btn" class="skill-btn" onclick="useSkill()">聖光救世 (0)</button>
+        </div>
+
+        <div id="math-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-title">數學挑戰！</div>
+                <p style="font-size: 1.2rem; color: #ddd;">解開方程永久提升傷害。<br>連續答對 3 題獲得清屏技能！</p>
+                <div id="math-equation">x + 1 = 5</div>
+                <div class="options-grid" id="math-options"></div>
+            </div>
+        </div>
+
+        <div id="sys-modal" class="modal-overlay">
+            <div class="modal-content" id="message-box">
+                <div id="message-title" class="modal-title">GAME OVER</div>
+                <p style="font-size: 1.2rem; margin-bottom: 20px;">怪物攻陷了你的城堡，你失去了所有生命。</p>
+                <p style="font-size: 1.5rem;">最終分數: <span id="final-score" style="color:var(--gold); font-weight:bold; font-size: 2rem;">0</span></p>
+                <button class="btn-primary" onclick="resetGame()">重新開始</button>
+            </div>
+        </div>
+        
+        <div id="start-modal" class="modal-overlay" style="display: flex;">
+            <div class="modal-content">
+                <div class="modal-title" style="font-size: 2.8rem; text-transform: uppercase;">Math Defender</div>
+                <p style="font-size: 1.3rem; color: #ccc;">保衛城堡，抵禦殭屍與飛龍大軍！</p>
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; color: #bbb;">
+                    <p style="margin: 5px 0;">🎯 <b>自動射擊：</b> 箭矢會自動連續射向滑鼠位置。</p>
+                    <p style="margin: 5px 0;">❤️ <b>生命系統：</b> 初始 3 顆心，被攻擊扣 1 顆，每 2000 分回復 1 顆。</p>
+                    <p style="margin: 5px 0; color: #66ff66;">📐 <b>數學挑戰：</b> 答對傷害 +30，2秒後怪物會加速湧出；答錯怪物會短暫暴走！</p>
+                    <p style="margin: 5px 0; color: #bf00ff;">⚠️ <b>特殊精英怪：</b> 第 10 秒後將出現高血量高速度的紫色精英怪！</p>
+                </div>
+                <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('game-container');
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playShootSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playHitSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        const uiHp = document.getElementById('ui-hp');
+        const uiScore = document.getElementById('ui-score');
+        const uiDmg = document.getElementById('ui-dmg');
+        const uiCombo = document.getElementById('combo-text');
+        const uiSkillBtn = document.getElementById('skill-btn');
+        const mathModal = document.getElementById('math-modal');
+        const mathEquation = document.getElementById('math-equation');
+        const mathOptions = document.getElementById('math-options');
+        const sysModal = document.getElementById('sys-modal');
+        const startModal = document.getElementById('start-modal');
+        const finalScoreSpan = document.getElementById('final-score');
+
+        const TOWER_X = 140;
+        const TOWER_WIDTH = 140;
+        const MATH_INTERVAL = 15000; 
+        
+        let gameState = 'START'; 
+        let lastTime = 0;
+        
+        let score = 0;
+        let hearts = 3;
+        let nextHeartScore = 2000;
+        let mathCombo = 0;
+        let skillCharges = 0;
+        let flashAlpha = 0; 
+        
+        let arrowDamage = 20; 
+        let arrowSpeed = 1500; 
+        
+        let arrows = [];
+        let enemies = [];
+        let particles = [];
+        let embers = []; 
+        
+        let spawnTimer = 0;
+        let spawnRate = 4000; 
+        let baseSpawnRateBonus = 0; 
+        let mathTimer = 0;
+        let spawnRateMultiplier = 1.0; 
+        let enemySpeedMultiplier = 1.0; 
+
+        let baseZombieHp = 100;
+        let baseDragonHp = 100;
+
+        let mouseX = canvas.width;
+        let mouseY = canvas.height / 2;
+        let fireTimer = 0;
+        let fireRate = 400; 
+        let totalGameTime = 0; 
+        let currentMathAnswer = null;
+
+        function initEmbers() {
+            embers = [];
+            for (let i = 0; i < 35; i++) {
+                embers.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2.5 + 1,
+                    speedY: Math.random() * 25 + 12,
+                    speedX: Math.random() * 20 - 10,
+                    opacity: Math.random() * 0.7 + 0.3
+                });
+            }
+        }
+
+        function updateAndDrawEmbers(dt) {
+            ctx.save();
+            embers.forEach(e => {
+                e.y -= e.speedY * dt;
+                e.x += e.speedX * dt;
+                if (e.y < -10) {
+                    e.y = canvas.height + 10;
+                    e.x = Math.random() * canvas.width;
+                }
+                ctx.fillStyle = `rgba(255, ${Math.floor(80 + Math.random()*120)}, 20, ${e.opacity})`;
+                ctx.shadowColor = '#ff4400';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+        }
+
+        function drawSegmentedHpBar(ctx, x, y, width, height, currentHp, maxHp) {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(x - 2, y - 2, width + 4, height + 4); 
+            
+            const segments = 5;
+            const segmentWidth = (width - (segments - 1)) / segments;
+            const hpRatio = Math.max(0, currentHp / maxHp);
+            const activeSegments = Math.ceil(hpRatio * segments);
+
+            for(let i=0; i<segments; i++) {
+                const segX = x + i * (segmentWidth + 1);
+                if (i < activeSegments) {
+                    ctx.fillStyle = '#32cd32';
+                } else {
+                    ctx.fillStyle = '#222'; 
+                }
+                ctx.fillRect(segX, y, segmentWidth, height);
+            }
+        }
+
+        class Arrow {
+            constructor(startX, startY, targetX, targetY) {
+                this.x = startX;
+                this.y = startY;
+                this.damage = arrowDamage;
+                const dx = targetX - startX;
+                const dy = targetY - startY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance > 0) {
+                    this.vx = (dx / distance) * arrowSpeed;
+                    this.vy = (dy / distance) * arrowSpeed;
+                } else {
+                    this.vx = arrowSpeed;
+                    this.vy = 0;
+                }
+                this.angle = Math.atan2(this.vy, this.vx);
+                this.active = true;
+                this.length = 35;
+                this.history = []; 
+            }
+
+            update(dt) {
+                this.history.push({x: this.x, y: this.y});
+                if(this.history.length > 8) this.history.shift();
+
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.vy += 200 * dt; 
+                this.angle = Math.atan2(this.vy, this.vx);
+                
+                if (this.x > canvas.width + 100 || this.y > canvas.height + 100) {
+                    this.active = false;
+                }
+            }
+
+            draw(ctx) {
+                if(this.history.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.history[0].x, this.history[0].y);
+                    for(let i=1; i<this.history.length; i++) {
+                        ctx.lineTo(this.history[i].x, this.history[i].y);
+                    }
+                    ctx.strokeStyle = 'rgba(255, 100, 50, 0.5)';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                ctx.fillStyle = '#8b5a2b';
+                ctx.fillRect(-this.length, -1.5, this.length, 3);
+                ctx.fillStyle = '#ff3300';
+                ctx.beginPath(); ctx.moveTo(-this.length, -1.5); ctx.lineTo(-this.length - 6, -5); ctx.lineTo(-this.length + 3, -1.5); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(-this.length, 1.5); ctx.lineTo(-this.length - 6, 5); ctx.lineTo(-this.length + 3, 1.5); ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.shadowColor = '#ff2200';
+                ctx.shadowBlur = 6;
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-8, -4); ctx.lineTo(-8, 4); ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 300;
+                this.vy = (Math.random() - 0.5) * 300 - 50;
+                this.life = 1.0; 
+                this.color = color;
+                this.size = Math.random() * 5 + 3;
+                this.active = true;
+            }
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.vy += 400 * dt; 
+                this.life -= dt * 1.2;
+                if (this.life <= 0) this.active = false;
+            }
+            draw(ctx) {
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        class Zombie {
+            constructor(difficultyMultiplier) {
+                this.type = 'zombie';
+                this.width = 45;
+                this.height = 80;
+                this.x = canvas.width + this.width;
+                this.y = canvas.height - 110 - Math.random() * 20; 
+                this.maxHp = Math.floor(baseZombieHp * difficultyMultiplier);
+                this.hp = this.maxHp;
+                this.speed = (40 + Math.random() * 25) * (0.8 + Math.min(difficultyMultiplier * 0.2, 1.5));
+                this.active = true;
+                this.attackCooldown = 0;
+                this.animationTimer = Math.random() * 10;
+            }
+
+            update(dt) {
+                this.animationTimer += dt;
+                if (this.x > TOWER_X + TOWER_WIDTH/2 + 20) {
+                    this.x -= this.speed * enemySpeedMultiplier * dt;
+                } else {
+                    if (this.attackCooldown <= 0) {
+                        takeDamage();
+                        this.attackCooldown = 1.0; 
+                    } else {
+                        this.attackCooldown -= dt;
+                    }
+                }
+            }
+
+            draw(ctx) {
+                const bob = Math.sin(this.animationTimer * 8) * 3;
+                const legAngle = Math.sin(this.animationTimer * 7) * 0.25;
+                const armWave = Math.sin(this.animationTimer * 6) * 4;
+
+                ctx.save();
+                ctx.translate(this.x, this.y + bob);
+
+                const skinColor = '#8fa362';
+                const skinDark = '#687b43';
+                const shirtColor = '#5c3d31';
+                const pantsColor = '#3a4856';
+                const patchColor = '#5e4334';
+                const teethColor = '#ece2c6';
+                const eyeColor = '#fcf6d2';
+                const outlineColor = '#1c2214';
+
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // --- 1. 後腳 ---
+                ctx.save();
+                ctx.translate(5, -30);
+                ctx.rotate(-legAngle);
+                ctx.fillStyle = '#2d3843';
+                ctx.beginPath();
+                ctx.moveTo(-5, 0); ctx.lineTo(6, 0); ctx.lineTo(4, 18); ctx.lineTo(-6, 18);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = skinDark;
+                ctx.beginPath();
+                ctx.moveTo(-4, 18); ctx.lineTo(3, 18); ctx.lineTo(1, 30); ctx.lineTo(-10, 30);
+                ctx.lineTo(-12, 26); ctx.lineTo(-5, 26);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 2. 後手臂 ---
+                ctx.save();
+                ctx.translate(2, -48);
+                ctx.fillStyle = shirtColor;
+                ctx.beginPath();
+                ctx.moveTo(-4, -4); ctx.lineTo(6, -2); ctx.lineTo(-8, 12); ctx.lineTo(-14, 8);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = skinDark;
+                ctx.beginPath();
+                ctx.moveTo(-11, 10);
+                ctx.quadraticCurveTo(-25, 8 + armWave, -36, 12 + armWave);
+                ctx.lineTo(-42, 10 + armWave); ctx.lineTo(-38, 15 + armWave);
+                ctx.lineTo(-43, 16 + armWave); ctx.lineTo(-37, 19 + armWave);
+                ctx.quadraticCurveTo(-22, 16 + armWave, -9, 14);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 3. 身體/衣服 ---
+                ctx.fillStyle = shirtColor;
+                ctx.beginPath();
+                ctx.moveTo(-12, -54); 
+                ctx.lineTo(8, -52);   
+                ctx.lineTo(12, -32);  
+                ctx.lineTo(7, -28); ctx.lineTo(3, -34); ctx.lineTo(-2, -28); 
+                ctx.lineTo(-7, -33); ctx.lineTo(-14, -28); ctx.lineTo(-15, -45);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                // --- 4. 前腳 ---
+                ctx.save();
+                ctx.translate(-5, -30);
+                ctx.rotate(legAngle);
+                ctx.fillStyle = pantsColor;
+                ctx.beginPath();
+                ctx.moveTo(-6, 0); ctx.lineTo(6, 0); ctx.lineTo(7, 14); ctx.lineTo(-7, 14);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = skinColor;
+                ctx.beginPath(); ctx.ellipse(0, 14, 4, 3, 0, 0, Math.PI*2); ctx.fill();
+                
+                ctx.fillStyle = pantsColor;
+                ctx.beginPath();
+                ctx.moveTo(-7, 14); ctx.lineTo(7, 14); 
+                ctx.lineTo(5, 22); ctx.lineTo(2, 19); ctx.lineTo(-1, 23); ctx.lineTo(-6, 20);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = skinColor;
+                ctx.beginPath();
+                ctx.moveTo(-4, 20); ctx.lineTo(3, 20); ctx.lineTo(1, 32); 
+                ctx.lineTo(-12, 32); ctx.quadraticCurveTo(-14, 28, -8, 28); ctx.lineTo(-3, 28);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(-10, 32); ctx.lineTo(-10, 29); ctx.stroke();
+                ctx.restore();
+
+                // --- 5. 前手臂 ---
+                ctx.save();
+                ctx.translate(-8, -48);
+                ctx.fillStyle = shirtColor;
+                ctx.beginPath();
+                ctx.moveTo(-4, -6); ctx.lineTo(8, -4); ctx.lineTo(2, 10); ctx.lineTo(-8, 6);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = skinColor;
+                ctx.beginPath();
+                ctx.moveTo(-5, 4);
+                ctx.quadraticCurveTo(-22, 2 - armWave, -38, 5 - armWave);
+                ctx.lineTo(-46, 2 - armWave); ctx.lineTo(-42, 8 - armWave);
+                ctx.lineTo(-48, 10 - armWave); ctx.lineTo(-41, 13 - armWave);
+                ctx.lineTo(-45, 16 - armWave); ctx.lineTo(-38, 16 - armWave);
+                ctx.quadraticCurveTo(-20, 12 - armWave, -3, 9);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 6. 頭部 ---
+                ctx.save();
+                ctx.translate(-5, -60);
+
+                ctx.fillStyle = skinColor;
+                ctx.fillRect(-2, -2, 8, 10);
+                ctx.strokeRect(-2, -2, 8, 10);
+
+                ctx.beginPath();
+                ctx.moveTo(-6, -2); 
+                ctx.lineTo(-18, -6); 
+                ctx.quadraticCurveTo(-22, -18, -20, -28); 
+                ctx.quadraticCurveTo(-20, -48, -2, -48);  
+                ctx.quadraticCurveTo(16, -46, 16, -28);   
+                ctx.quadraticCurveTo(14, -10, 2, -2);     
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = patchColor;
+                ctx.beginPath();
+                ctx.moveTo(0, -48);
+                ctx.quadraticCurveTo(12, -46, 14, -36);
+                ctx.lineTo(8, -38); ctx.lineTo(4, -44);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = skinDark;
+                ctx.beginPath(); ctx.arc(-2, -40, 1.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(4, -38, 2, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(8, -28, 1.5, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = skinColor;
+                ctx.beginPath();
+                ctx.arc(12, -24, 4, Math.PI*0.5, Math.PI*1.8);
+                ctx.fill(); ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(-20, -28);
+                ctx.quadraticCurveTo(-12, -32, -2, -28);
+                ctx.stroke();
+
+                ctx.fillStyle = eyeColor;
+                ctx.beginPath();
+                ctx.ellipse(-17, -26, 3.5, 4.5, -0.2, 0, Math.PI*2);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#1c1b17';
+                ctx.beginPath(); ctx.arc(-18, -26, 1.5, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = eyeColor;
+                ctx.beginPath();
+                ctx.arc(-8, -25, 7, 0, Math.PI*2);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#1c1b17';
+                ctx.beginPath(); ctx.arc(-10, -25, 2.5, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = outlineColor;
+                ctx.beginPath();
+                ctx.moveTo(-16, -18); ctx.lineTo(-13, -20); ctx.lineTo(-13, -16);
+                ctx.closePath(); ctx.fill();
+
+                ctx.fillStyle = '#211510';
+                ctx.beginPath();
+                ctx.moveTo(-19, -13);
+                ctx.quadraticCurveTo(-10, -18, -3, -12);
+                ctx.quadraticCurveTo(-10, -4, -18, -8);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = teethColor;
+                ctx.fillRect(-16, -15, 3, 3); ctx.strokeRect(-16, -15, 3, 3);
+                ctx.fillRect(-12, -16, 3, 3); ctx.strokeRect(-12, -16, 3, 3);
+                ctx.fillRect(-14, -9, 3, 3); ctx.strokeRect(-14, -9, 3, 3);
+
+                ctx.restore();
+                ctx.restore();
+                
+                drawSegmentedHpBar(ctx, this.x - this.width/2 - 10, this.y - this.height - 25, 60, 6, this.hp, this.maxHp);
+            }
+        }
+
+        class EliteZombie extends Zombie {
+            constructor(difficultyMultiplier) {
+                super(difficultyMultiplier);
+                this.type = 'elite';
+                this.width = 50;
+                this.height = 90;
+                this.maxHp = Math.floor(baseZombieHp * 2.5 * difficultyMultiplier);
+                this.hp = this.maxHp;
+                this.speed = (70 + Math.random() * 25) * (0.8 + Math.min(difficultyMultiplier * 0.2, 1.5));
+            }
+            draw(ctx) {
+                const bob = Math.sin(this.animationTimer * 10) * 4;
+                const legAngle = Math.sin(this.animationTimer * 9) * 0.3;
+                const armWave = Math.sin(this.animationTimer * 8) * 5;
+
+                ctx.save();
+                ctx.translate(this.x, this.y + bob);
+
+                const skinColor = '#8a6bb0';
+                const skinDark = '#5e4380';
+                const shirtColor = '#4a225c';
+                const pantsColor = '#241733';
+                const patchColor = '#321942';
+                const teethColor = '#e0d2aa';
+                const outlineColor = '#120b1a';
+
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 2.2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // --- 1. 後腳 ---
+                ctx.save();
+                ctx.translate(5, -34); ctx.rotate(-legAngle);
+                ctx.fillStyle = '#181024';
+                ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(7, 0); ctx.lineTo(5, 20); ctx.lineTo(-7, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = skinDark;
+                ctx.beginPath(); ctx.moveTo(-5, 20); ctx.lineTo(4, 20); ctx.lineTo(2, 34); ctx.lineTo(-12, 34); ctx.lineTo(-14, 29); ctx.lineTo(-6, 29); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 2. 後手臂 ---
+                ctx.save();
+                ctx.translate(2, -54);
+                ctx.fillStyle = shirtColor;
+                ctx.beginPath(); ctx.moveTo(-5, -4); ctx.lineTo(7, -2); ctx.lineTo(-9, 14); ctx.lineTo(-16, 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = skinDark;
+                ctx.beginPath(); ctx.moveTo(-12, 11); ctx.quadraticCurveTo(-28, 9 + armWave, -40, 14 + armWave);
+                ctx.lineTo(-47, 11 + armWave); ctx.lineTo(-42, 17 + armWave); ctx.lineTo(-48, 18 + armWave); ctx.lineTo(-41, 21 + armWave); ctx.quadraticCurveTo(-24, 18 + armWave, -10, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 3. 軀幹/衣服 ---
+                ctx.fillStyle = shirtColor;
+                ctx.beginPath();
+                ctx.moveTo(-14, -60); ctx.lineTo(10, -58); ctx.lineTo(14, -36);
+                ctx.lineTo(8, -31); ctx.lineTo(3, -38); ctx.lineTo(-2, -31); ctx.lineTo(-8, -37); ctx.lineTo(-16, -31); ctx.lineTo(-17, -50);
+                ctx.closePath(); ctx.fill(); ctx.stroke();
+
+                // --- 4. 前腳 ---
+                ctx.save();
+                ctx.translate(-6, -34); ctx.rotate(legAngle);
+                ctx.fillStyle = pantsColor;
+                ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(7, 0); ctx.lineTo(8, 16); ctx.lineTo(-8, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = skinColor;
+                ctx.beginPath(); ctx.ellipse(0, 16, 5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = pantsColor;
+                ctx.beginPath(); ctx.moveTo(-8, 16); ctx.lineTo(8, 16); ctx.lineTo(6, 25); ctx.lineTo(2, 21); ctx.lineTo(-1, 26); ctx.lineTo(-7, 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = skinColor;
+                ctx.beginPath(); ctx.moveTo(-5, 22); ctx.lineTo(4, 22); ctx.lineTo(2, 36); ctx.lineTo(-14, 36); ctx.quadraticCurveTo(-16, 31, -9, 31); ctx.lineTo(-3, 31); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 5. 前手臂 ---
+                ctx.save();
+                ctx.translate(-9, -54);
+                ctx.fillStyle = shirtColor;
+                ctx.beginPath(); ctx.moveTo(-5, -7); ctx.lineTo(9, -4); ctx.lineTo(2, 12); ctx.lineTo(-9, 7); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = skinColor;
+                ctx.beginPath(); ctx.moveTo(-6, 5); ctx.quadraticCurveTo(-25, 2 - armWave, -42, 6 - armWave);
+                ctx.lineTo(-51, 2 - armWave); ctx.lineTo(-46, 9 - armWave); ctx.lineTo(-53, 11 - armWave); ctx.lineTo(-45, 15 - armWave); ctx.lineTo(-50, 18 - armWave); ctx.lineTo(-42, 18 - armWave); ctx.quadraticCurveTo(-22, 14 - armWave, -3, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+                ctx.restore();
+
+                // --- 6. 頭部與紅眼 ---
+                ctx.save();
+                ctx.translate(-6, -67);
+                ctx.fillStyle = skinColor;
+                ctx.fillRect(-2, -2, 9, 11); ctx.strokeRect(-2, -2, 9, 11);
+
+                ctx.beginPath(); ctx.moveTo(-7, -2); ctx.lineTo(-20, -7); ctx.quadraticCurveTo(-24, -20, -22, -31); ctx.quadraticCurveTo(-22, -53, -2, -53); ctx.quadraticCurveTo(18, -51, 18, -31); ctx.quadraticCurveTo(15, -11, 2, -2); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = patchColor;
+                ctx.beginPath(); ctx.moveTo(0, -53); ctx.quadraticCurveTo(14, -51, 16, -40); ctx.lineTo(9, -42); ctx.lineTo(4, -48); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = '#ffdd44';
+                ctx.beginPath(); ctx.ellipse(-19, -29, 4, 5, -0.2, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(-20, -29, 2, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = '#ffdd44';
+                ctx.beginPath(); ctx.arc(-9, -28, 8, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(-11, -28, 3, 0, Math.PI*2); ctx.fill();
+
+                ctx.fillStyle = outlineColor;
+                ctx.beginPath(); ctx.moveTo(-18, -20); ctx.lineTo(-14, -22); ctx.lineTo(-14, -18); ctx.closePath(); ctx.fill();
+
+                ctx.fillStyle = '#1c0726';
+                ctx.beginPath(); ctx.moveTo(-21, -14); ctx.quadraticCurveTo(-11, -20, -3, -13); ctx.quadraticCurveTo(-11, -4, -20, -9); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = teethColor;
+                ctx.fillRect(-18, -16, 3.5, 3.5); ctx.strokeRect(-18, -16, 3.5, 3.5);
+                ctx.fillRect(-13, -17, 3.5, 3.5); ctx.strokeRect(-13, -17, 3.5, 3.5);
+                ctx.fillRect(-15, -10, 3.5, 3.5); ctx.strokeRect(-15, -10, 3.5, 3.5);
+
+                ctx.restore();
+                ctx.restore();
+                
+                drawSegmentedHpBar(ctx, this.x - this.width/2 - 10, this.y - this.height - 25, 65, 8, this.hp, this.maxHp);
+            }
+        }
+
+        class Dragon {
+            constructor(difficultyMultiplier) {
+                this.type = 'dragon';
+                this.width = 50;
+                this.height = 40;
+                this.x = canvas.width + this.width;
+                this.startY = 80 + Math.random() * 120; 
+                this.y = this.startY;
+                
+                this.maxHp = Math.floor(baseDragonHp * difficultyMultiplier);
+                this.hp = this.maxHp;
+                this.speed = (65 + Math.random() * 30) * (0.8 + Math.min(difficultyMultiplier * 0.2, 1.5));
+                this.active = true;
+                this.attackCooldown = 0;
+                this.animationTimer = Math.random() * 10;
+            }
+
+            update(dt) {
+                this.animationTimer += dt;
+                this.y = this.startY + Math.sin(this.animationTimer * 3) * 30;
+
+                if (this.x > TOWER_X + TOWER_WIDTH/2 + 10) {
+                    this.x -= this.speed * enemySpeedMultiplier * dt;
+                } else {
+                    if (this.attackCooldown <= 0) {
+                        takeDamage();
+                        createParticles(TOWER_X + TOWER_WIDTH, this.y, '#00e5ff', 15); 
+                        this.attackCooldown = 1.0; 
+                    } else {
+                        this.attackCooldown -= dt;
+                    }
+                }
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                const wingFlap = Math.sin(this.animationTimer * 15);
+                const bob = Math.sin(this.animationTimer * 5) * 2;
+                ctx.translate(0, bob); 
+
+                const boneColor = '#e6e6e2';
+                const outlineColor = '#222';
+                const magicBlue = '#140c42';
+                const magicCyan = '#00e5ff';
+                const flicker = Math.random() * 3;
+
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 1.5;
+                ctx.lineJoin = 'round';
+
+                // --- 1. 後側骨翼 ---
+                ctx.strokeStyle = '#555'; 
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(10, -10);
+                ctx.quadraticCurveTo(-5, -40 * wingFlap - 25, 25, -45 * wingFlap - 25);
+                ctx.stroke();
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(25, -45 * wingFlap - 25); ctx.quadraticCurveTo(40, -25 * wingFlap - 10, 45, -5 * wingFlap); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(25, -45 * wingFlap - 25); ctx.quadraticCurveTo(25, -20 * wingFlap - 5, 30, 5 * wingFlap); ctx.stroke();
+                ctx.strokeStyle = outlineColor; 
+
+                // --- 2. 後腳骨骼 ---
+                ctx.fillStyle = '#b0b0b0'; 
+                ctx.beginPath();
+                ctx.moveTo(15, -2); ctx.lineTo(22, 10); ctx.lineTo(17, 18); 
+                ctx.lineTo(20, 18); ctx.lineTo(25, 10); ctx.lineTo(20, -5);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                // --- 3. 藍色魔法核心 ---
+                ctx.fillStyle = magicBlue;
+                ctx.shadowColor = magicCyan;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.ellipse(5, -2, 18, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = magicCyan;
+                ctx.shadowBlur = 15 + flicker;
+                ctx.beginPath();
+                ctx.ellipse(2, -2, 10, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0; 
+
+                // --- 4. 尾椎骨 ---
+                ctx.fillStyle = boneColor;
+                let tailX = 18;
+                let tailY = -2;
+                for(let i=0; i<7; i++) {
+                    let tx = tailX + i*4;
+                    let ty = tailY + i*1.2 + Math.sin(this.animationTimer*6 - i*0.5)*4;
+                    ctx.beginPath(); ctx.arc(tx, ty, 3.5 - i*0.4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(tx-1, ty); ctx.lineTo(tx, ty - 6 + i*0.5); ctx.lineTo(tx+2, ty); ctx.fill(); ctx.stroke();
+                    if (i%2===0) {
+                        ctx.fillStyle = magicCyan;
+                        ctx.beginPath(); ctx.arc(tx, ty+3, 1.5, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = boneColor;
+                    }
+                }
+
+                // --- 5. 頸椎骨 ---
+                let neckX = -8;
+                let neckY = -2;
+                let nx, ny;
+                for(let i=0; i<4; i++) {
+                    nx = neckX - i*4;
+                    ny = neckY - i*3 + Math.sin(this.animationTimer*6 + i*0.5)*3;
+                    ctx.beginPath(); ctx.arc(nx, ny, 4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(nx-1, ny); ctx.lineTo(nx, ny - 6); ctx.lineTo(nx+2, ny); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = magicCyan;
+                    ctx.beginPath(); ctx.arc(nx+1, ny+2, 1.5, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = boneColor;
+                }
+
+                // --- 6. 前腳骨骼 ---
+                ctx.fillStyle = boneColor;
+                ctx.beginPath();
+                ctx.moveTo(0, 0); ctx.lineTo(-5, 12); ctx.lineTo(-10, 18); 
+                ctx.lineTo(-6, 18); ctx.lineTo(-2, 12); ctx.lineTo(5, -2);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                // --- 7. 胸腔肋骨 ---
+                ctx.lineWidth = 2;
+                for(let i=0; i<4; i++) {
+                    ctx.beginPath();
+                    let rx = -5 + i*5;
+                    ctx.moveTo(rx, -8);
+                    ctx.quadraticCurveTo(rx - 8, 2, rx, 8);
+                    ctx.quadraticCurveTo(rx + 3, 2, rx + 4, -5);
+                    ctx.fill(); ctx.stroke();
+                }
+
+                // --- 8. 龍頭骨與雙角 ---
+                let headX = nx - 6;
+                let headY = ny - 5;
+
+                ctx.beginPath();
+                ctx.moveTo(headX + 5, headY + 5);
+                ctx.lineTo(headX - 8, headY + 12);
+                ctx.lineTo(headX - 5, headY + 15);
+                ctx.lineTo(headX + 4, headY + 10);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(headX + 5, headY + 5);
+                ctx.lineTo(headX, headY - 4);
+                ctx.lineTo(headX - 10, headY - 3);
+                ctx.lineTo(headX - 16, headY + 5);
+                ctx.lineTo(headX - 10, headY + 10);
+                ctx.lineTo(headX, headY + 8);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                ctx.beginPath(); ctx.moveTo(headX-12, headY+7); ctx.lineTo(headX-11, headY+10); ctx.lineTo(headX-9, headY+8); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(headX-8, headY+8); ctx.lineTo(headX-7, headY+11); ctx.lineTo(headX-5, headY+9); ctx.stroke();
+
+                ctx.fillStyle = '#c0c0b8'; 
+                ctx.beginPath();
+                ctx.moveTo(headX - 2, headY - 2);
+                ctx.quadraticCurveTo(headX + 2, -35 + bob, headX + 10, -32 + bob);
+                ctx.quadraticCurveTo(headX + 5, -20 + bob, headX + 4, headY + 2);
+                ctx.fill(); ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(headX - 6, headY - 2);
+                ctx.quadraticCurveTo(headX - 4, -25 + bob, headX + 2, -22 + bob);
+                ctx.quadraticCurveTo(headX - 2, -15 + bob, headX - 2, headY);
+                ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = magicCyan;
+                ctx.shadowColor = magicCyan;
+                ctx.shadowBlur = 8 + flicker/2;
+                ctx.beginPath(); ctx.ellipse(headX - 6, headY + 2, 2.5, 1.5, Math.PI/6, 0, Math.PI*2); ctx.fill();
+                
+                ctx.globalAlpha = 0.8;
+                ctx.beginPath();
+                ctx.moveTo(headX - 8, headY);
+                ctx.quadraticCurveTo(headX - 12 - flicker, headY - 10, headX - 4 + flicker, headY - 15 - flicker);
+                ctx.quadraticCurveTo(headX - 4, headY - 8, headX - 4, headY);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 0;
+
+                // --- 9. 前側骨翼 ---
+                ctx.strokeStyle = outlineColor;
+                ctx.fillStyle = boneColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(5, -5);
+                ctx.quadraticCurveTo(-15, -60 * wingFlap - 30, 25, -70 * wingFlap - 30);
+                ctx.stroke();
+                
+                ctx.beginPath(); ctx.arc(25, -70 * wingFlap - 30, 3.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(25, -70 * wingFlap - 30); ctx.quadraticCurveTo(45, -20 * wingFlap - 10, 55, 10 * wingFlap); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(25, -70 * wingFlap - 30); ctx.quadraticCurveTo(30, -10 * wingFlap - 5, 35, 20 * wingFlap); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(25, -70 * wingFlap - 30); ctx.quadraticCurveTo(10, -20 * wingFlap - 10, 10, 15 * wingFlap); ctx.stroke();
+
+                ctx.restore();
+                
+                drawSegmentedHpBar(ctx, this.x - 25, this.y - 65, 50, 6, this.hp, this.maxHp);
+            }
+        }
+
+        function updateAim(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            mouseX = (clientX - rect.left) * scaleX;
+            mouseY = (clientY - rect.top) * scaleY;
+        }
+
+        canvas.addEventListener('mousemove', (e) => updateAim(e.clientX, e.clientY));
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            updateAim(e.touches[0].clientX, e.touches[0].clientY);
+        }, {passive: false});
+        canvas.addEventListener('touchstart', (e) => {
+            updateAim(e.touches[0].clientX, e.touches[0].clientY);
+        }, {passive: false});
+
+        function spawnEnemy() {
+            let difficultyMultiplier = 1 + (totalGameTime / 60); 
+            const rand = Math.random();
+
+            if (totalGameTime >= 10 && rand < 0.25) {
+                enemies.push(new EliteZombie(difficultyMultiplier));
+            } else if (rand < 0.45) {
+                enemies.push(new Dragon(difficultyMultiplier));
+            } else {
+                enemies.push(new Zombie(difficultyMultiplier));
+            }
+            
+            spawnRate = Math.max(600, 4000 - (totalGameTime * 15) - baseSpawnRateBonus); 
+        }
+
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function showFloatingText(x, y, text, type="dmg-text") {
+            const el = document.createElement('div');
+            el.className = `floating-text ${type}`;
+            el.textContent = text;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = rect.width / canvas.width;
+            const scaleY = rect.height / canvas.height;
+            el.style.left = `${(x * scaleX) + (Math.random() * 30 - 15)}px`;
+            el.style.top = `${(y * scaleY) - 40}px`;
+            container.appendChild(el);
+            setTimeout(() => { if(container.contains(el)) container.removeChild(el); }, 1000);
+        }
+
+        function takeDamage() {
+            if (hearts <= 0) return;
+            hearts -= 1;
+            showFloatingText(TOWER_X + TOWER_WIDTH/2, canvas.height - 250, "-1 ❤️", "dmg-player");
+            if (hearts <= 0) {
+                hearts = 0;
+                gameOver();
+            }
+            updateUI();
+        }
+
+        function addScore(amount) {
+            score += amount;
+            if (score >= nextHeartScore) {
+                hearts += 1;
+                nextHeartScore += 2000;
+                showFloatingText(TOWER_X + TOWER_WIDTH/2, canvas.height - 300, "+1 ❤️", "heal-text");
+                createParticles(TOWER_X + TOWER_WIDTH/2, canvas.height - 250, '#ff3333', 30);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            if (hearts <= 7) {
+                uiHp.textContent = '❤️'.repeat(hearts) || '防禦崩潰';
+            } else {
+                uiHp.textContent = `❤️ x ${hearts}`;
+            }
+            uiScore.textContent = score;
+            uiDmg.textContent = arrowDamage;
+            uiCombo.textContent = `連續答對: ${mathCombo}/3`;
+            uiSkillBtn.textContent = `聖光救世 (${skillCharges})`;
+            if (skillCharges > 0) uiSkillBtn.classList.add('ready');
+            else uiSkillBtn.classList.remove('ready');
+        }
+
+        function triggerMathEvent() {
+            gameState = 'PAUSED_MATH';
+            generateMathProblem();
+            mathModal.style.display = 'flex';
+        }
+
+        function generateMathProblem() {
+            const type = Math.floor(Math.random() * 3);
+            let equation = "";
+            let answer = 0;
+            if (type === 0) { 
+                const a = Math.floor(Math.random() * 20) + 1;
+                answer = Math.floor(Math.random() * 20) + 1;
+                equation = `x + ${a} = ${answer + a}`;
+            } else if (type === 1) { 
+                const a = Math.floor(Math.random() * 9) + 2;
+                answer = Math.floor(Math.random() * 12) + 1;
+                equation = `${a}x = ${a * answer}`;
+            } else { 
+                const a = Math.floor(Math.random() * 5) + 2;
+                answer = Math.floor(Math.random() * 10) + 1;
+                const b = Math.floor(Math.random() * 15) + 1;
+                equation = `${a}x + ${b} = ${(a * answer) + b}`;
+            }
+
+            currentMathAnswer = answer;
+            mathEquation.textContent = equation;
+
+            let options = [answer];
+            while (options.length < 4) {
+                let offset = Math.floor(Math.random() * 9) - 4;
+                if (offset === 0) offset = 5;
+                let wrong = answer + offset;
+                if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            mathOptions.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => handleMathAnswer(opt);
+                mathOptions.appendChild(btn);
+            });
+        }
+
+        function handleMathAnswer(selectedOption) {
+            if (selectedOption === currentMathAnswer) {
+                arrowDamage += 30;
+                mathCombo++;
+                createParticles(canvas.width/2, canvas.height/2, '#ffd700', 100); 
+                if (mathCombo >= 3) {
+                    skillCharges++;
+                    mathCombo = 0;
+                    showFloatingText(canvas.width/2, canvas.height/2 - 50, "技能解鎖!", "heal-text");
+                }
+                setTimeout(() => {
+                    if (gameState === 'PLAYING') {
+                        spawnRateMultiplier = 0.5; 
+                        showFloatingText(canvas.width/2, canvas.height/2, "怪物大軍加速湧出！", "dmg-text");
+                        setTimeout(() => { spawnRateMultiplier = 1.0; baseSpawnRateBonus += 400; }, 5000);
+                    }
+                }, 2000);
+                mathTimer = 0; 
+            } else {
+                mathCombo = 0; 
+                createParticles(canvas.width/2, canvas.height/2, '#555', 50);
+                enemySpeedMultiplier = 1.35; 
+                showFloatingText(canvas.width/2, canvas.height/2, "答錯！怪物狂暴加速！", "dmg-text");
+                setTimeout(() => { enemySpeedMultiplier = 1.0; }, 2000);
+                mathTimer = MATH_INTERVAL - 5000;
+            }
+            updateUI();
+            mathModal.style.display = 'none';
+            gameState = 'PLAYING';
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function useSkill() {
+            if (skillCharges > 0 && gameState === 'PLAYING') {
+                skillCharges--;
+                mathCombo = 0; 
+                enemies.forEach(e => {
+                    let pts = 100;
+                    if (e.type === 'dragon') pts = 150;
+                    if (e.type === 'elite') pts = 250;
+                    addScore(pts);
+                    createParticles(e.x, e.y, '#ffffff', 20); 
+                });
+                enemies = []; 
+                flashAlpha = 1.0; 
+                updateUI();
+            }
+        }
+
+        function drawBackground() {
+            // 末世赤紅天際夜空
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#0a0307');
+            skyGrad.addColorStop(0.4, '#240810');
+            skyGrad.addColorStop(0.75, '#450d18');
+            skyGrad.addColorStop(1, '#1a0b0d');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 廢土血月 (Blood Moon)
+            ctx.save();
+            ctx.shadowColor = '#ff2200';
+            ctx.shadowBlur = 35;
+            const moonGrad = ctx.createRadialGradient(220, 120, 10, 220, 120, 75);
+            moonGrad.addColorStop(0, '#ff9988');
+            moonGrad.addColorStop(0.6, '#cc2211');
+            moonGrad.addColorStop(1, '#660000');
+            ctx.fillStyle = moonGrad;
+            ctx.beginPath();
+            ctx.arc(220, 120, 75, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // 月球隕石坑細節
+            ctx.fillStyle = 'rgba(40, 0, 0, 0.4)';
+            ctx.beginPath(); ctx.arc(195, 95, 18, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(250, 135, 25, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(210, 150, 14, 0, Math.PI*2); ctx.fill();
+
+            // 遠景：殘破城市與尖塔廢墟剪影
+            ctx.fillStyle = '#14060a';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 130);
+            ctx.lineTo(80, 320); ctx.lineTo(130, 350); ctx.lineTo(190, 290);
+            ctx.lineTo(240, 360); ctx.lineTo(310, 280); ctx.lineTo(330, 380);
+            ctx.lineTo(410, 310); ctx.lineTo(470, 370); ctx.lineTo(550, 260);
+            ctx.lineTo(570, 260); ctx.lineTo(590, 380); ctx.lineTo(680, 300);
+            ctx.lineTo(760, 370); ctx.lineTo(850, 270); ctx.lineTo(920, 340);
+            ctx.lineTo(1024, 290); ctx.lineTo(1024, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+
+            // 中景濃煙與迷霧層
+            const fogGrad = ctx.createLinearGradient(0, 280, 0, canvas.height - 120);
+            fogGrad.addColorStop(0, 'rgba(80, 20, 20, 0)');
+            fogGrad.addColorStop(0.6, 'rgba(120, 30, 25, 0.25)');
+            fogGrad.addColorStop(1, 'rgba(25, 10, 12, 0.8)');
+            ctx.fillStyle = fogGrad;
+            ctx.fillRect(0, 280, canvas.width, canvas.height - 280);
+
+            // 地面：裂谷與荒漠
+            ctx.fillStyle = '#1c1517';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 140);
+            ctx.quadraticCurveTo(300, canvas.height - 160, 600, canvas.height - 130);
+            ctx.quadraticCurveTo(800, canvas.height - 110, canvas.width, canvas.height - 135);
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.fill();
+
+            // 地裂岩漿紋路
+            ctx.strokeStyle = '#ff3300';
+            ctx.shadowColor = '#ff5500';
+            ctx.shadowBlur = 8;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(250, canvas.height - 100); ctx.lineTo(320, canvas.height - 70); ctx.lineTo(390, canvas.height - 85);
+            ctx.moveTo(480, canvas.height - 110); ctx.lineTo(530, canvas.height - 60); ctx.lineTo(610, canvas.height - 75);
+            ctx.moveTo(700, canvas.height - 90); ctx.lineTo(780, canvas.height - 50); ctx.lineTo(840, canvas.height - 80);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            drawTombstones();
+        }
+
+        function drawTombstones() {
+            const graves = [
+                {x: 420, y: canvas.height - 130, w: 32, h: 50, tilt: -0.1},
+                {x: 620, y: canvas.height - 125, w: 28, h: 42, tilt: 0.15},
+                {x: 750, y: canvas.height - 110, w: 42, h: 58, tilt: -0.05, glow: true},
+                {x: 890, y: canvas.height - 120, w: 30, h: 45, tilt: 0.08}
+            ];
+
+            graves.forEach(g => {
+                ctx.save();
+                ctx.translate(g.x, g.y);
+                ctx.rotate(g.tilt);
+
+                // 墓碑陰影
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(-g.w/2 + 5, -5, g.w, 10);
+
+                // 石頭紋理
+                const stoneGrad = ctx.createLinearGradient(-g.w/2, 0, g.w/2, 0);
+                stoneGrad.addColorStop(0, '#3a3a3d');
+                stoneGrad.addColorStop(0.5, '#545458');
+                stoneGrad.addColorStop(1, '#2b2b2d');
+                ctx.fillStyle = stoneGrad;
+
+                ctx.beginPath();
+                ctx.moveTo(-g.w/2, 0);
+                ctx.lineTo(-g.w/2, -g.h + g.w/2);
+                ctx.arc(0, -g.h + g.w/2, g.w/2, Math.PI, 0);
+                ctx.lineTo(g.w/2, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = '#18181a';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 雕刻十字/符文
+                ctx.strokeStyle = g.glow ? '#ff3300' : '#222';
+                if(g.glow) { ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 6; }
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, -g.h + 20); ctx.lineTo(0, -g.h + 40);
+                ctx.moveTo(-8, -g.h + 27); ctx.lineTo(8, -g.h + 27);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                ctx.restore();
+            });
+
+            // 殘破枯木
+            ctx.strokeStyle = '#151112';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(360, canvas.height - 110);
+            ctx.lineTo(350, canvas.height - 170);
+            ctx.lineTo(335, canvas.height - 195);
+            ctx.moveTo(350, canvas.height - 170);
+            ctx.lineTo(365, canvas.height - 190);
+            ctx.stroke();
+        }
+
+        function drawTower() {
+            const baseY = canvas.height - 380;
+            const towerLeft = 50;
+            const towerRight = 230;
+            const towerWidth = towerRight - towerLeft; 
+
+            ctx.save();
+
+            // 城堡塔投影
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.beginPath();
+            ctx.ellipse(towerLeft + towerWidth/2 + 30, canvas.height - 20, 120, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 1. 塔身漸層石磚與鋼鐵材質
+            const wallGrad = ctx.createLinearGradient(towerLeft, 0, towerRight, 0);
+            wallGrad.addColorStop(0, '#1c1b22');
+            wallGrad.addColorStop(0.25, '#3d3b45');
+            wallGrad.addColorStop(0.7, '#2b2933');
+            wallGrad.addColorStop(1, '#141318');
+
+            ctx.fillStyle = wallGrad;
+            ctx.fillRect(towerLeft, baseY, towerWidth, canvas.height - baseY);
+
+            // 塔外邊線
+            ctx.strokeStyle = '#0a0a0d';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(towerLeft, baseY, towerWidth, canvas.height - baseY);
+
+            // 石磚分割線條
+            ctx.strokeStyle = 'rgba(10, 10, 15, 0.6)';
+            ctx.lineWidth = 1.5;
+            const rowHeight = 22;
+            for (let y = baseY; y < canvas.height; y += rowHeight) {
+                ctx.beginPath();
+                ctx.moveTo(towerLeft, y);
+                ctx.lineTo(towerRight, y);
+                ctx.stroke();
+
+                let offset = (Math.floor(y / rowHeight) % 2 === 0) ? 0 : 25;
+                for (let x = towerLeft + offset; x < towerRight; x += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x, y + rowHeight);
+                    ctx.stroke();
+                }
+            }
+
+            // 鉚釘鋼鐵加固帶
+            const bandYPositions = [baseY + 90, baseY + 190, baseY + 290];
+            bandYPositions.forEach(by => {
+                ctx.fillStyle = '#222328';
+                ctx.fillRect(towerLeft - 4, by, towerWidth + 8, 12);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(towerLeft - 4, by, towerWidth + 8, 12);
+
+                ctx.fillStyle = '#888990';
+                for (let rx = towerLeft + 6; rx < towerRight; rx += 24) {
+                    ctx.beginPath(); ctx.arc(rx, by + 6, 2.5, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(rx, by + 6, 2.5, 0, Math.PI*2); ctx.stroke();
+                }
+            });
+
+            // 赤紅箭縫窗戶 (Arrow Slits)
+            const windowPositions = [{x: towerLeft + 45, y: baseY + 120}, {x: towerLeft + 135, y: baseY + 120}, {x: towerLeft + 90, y: baseY + 220}];
+            windowPositions.forEach(w => {
+                ctx.save();
+                ctx.shadowColor = '#ff4400';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = '#ff3300';
+                ctx.fillRect(w.x - 5, w.y - 18, 10, 36);
+                ctx.beginPath(); ctx.arc(w.x, w.y - 18, 5, Math.PI, 0); ctx.fill();
+
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#111';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(w.x - 6, w.y - 19, 12, 38);
+                ctx.restore();
+            });
+
+            // 2. 塔頂齒牆 (Battlements & Spikes)
+            const merlonWidth = 26;
+            const merlonHeight = 32;
+            const merlonGap = 12;
+            const count = 5;
+
+            const ledgeGrad = ctx.createLinearGradient(towerLeft - 10, 0, towerRight + 10, 0);
+            ledgeGrad.addColorStop(0, '#2a2830');
+            ledgeGrad.addColorStop(0.5, '#4a4755');
+            ledgeGrad.addColorStop(1, '#1d1c22');
+            ctx.fillStyle = ledgeGrad;
+            ctx.fillRect(towerLeft - 12, baseY - 6, towerWidth + 24, 16);
+            ctx.strokeStyle = '#000';
+            ctx.strokeRect(towerLeft - 12, baseY - 6, towerWidth + 24, 16);
+
+            for (let i = 0; i < count; i++) {
+                let mx = towerLeft - 8 + i * (merlonWidth + merlonGap);
+                ctx.fillStyle = ledgeGrad;
+                ctx.fillRect(mx, baseY - merlonHeight - 4, merlonWidth, merlonHeight);
+                ctx.strokeRect(mx, baseY - merlonHeight - 4, merlonWidth, merlonHeight);
+
+                // 尖刺鐵防禦
+                ctx.fillStyle = '#222';
+                ctx.beginPath();
+                ctx.moveTo(mx + 4, baseY - merlonHeight - 4);
+                ctx.lineTo(mx + merlonWidth / 2, baseY - merlonHeight - 18);
+                ctx.lineTo(mx + merlonWidth - 4, baseY - merlonHeight - 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // 頂端動態火焰火炬
+            drawTorch(ctx, towerLeft - 5, baseY - 12);
+            drawTorch(ctx, towerRight + 5, baseY - 12);
+
+            // 3. 城堡底部黑鐵拱門 (Castle Gate)
+            const archX = towerLeft + towerWidth / 2;
+            const archY = canvas.height - 100;
+            const archRadius = 38;
+
+            ctx.fillStyle = '#282630';
+            ctx.beginPath();
+            ctx.arc(archX, archY, archRadius + 10, Math.PI, 0);
+            ctx.lineTo(archX + archRadius + 10, canvas.height);
+            ctx.lineTo(archX - archRadius - 10, canvas.height);
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#0a080d';
+            ctx.beginPath();
+            ctx.arc(archX, archY, archRadius, Math.PI, 0);
+            ctx.lineTo(archX + archRadius, canvas.height);
+            ctx.lineTo(archX - archRadius, canvas.height);
+            ctx.fill();
+
+            // 鐵柵門 (Portcullis)
+            ctx.strokeStyle = '#44424a';
+            ctx.lineWidth = 3;
+            for (let gx = archX - archRadius + 8; gx < archX + archRadius; gx += 12) {
+                ctx.beginPath();
+                ctx.moveTo(gx, archY - Math.sqrt(Math.max(0, archRadius*archRadius - (gx-archX)*(gx-archX))));
+                ctx.lineTo(gx, canvas.height);
+                ctx.stroke();
+            }
+            for (let gy = archY - 20; gy < canvas.height; gy += 20) {
+                ctx.beginPath();
+                ctx.moveTo(archX - archRadius + 4, gy);
+                ctx.lineTo(archX + archRadius - 4, gy);
+                ctx.stroke();
+            }
+
+            // 門縫透出的赤紅地熱光
+            ctx.save();
+            ctx.shadowColor = '#ff2200';
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = '#ff5500';
+            ctx.fillRect(archX - archRadius + 6, canvas.height - 6, (archRadius - 6) * 2, 6);
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function drawTorch(ctx, x, y) {
+            ctx.save();
+            ctx.fillStyle = '#111';
+            ctx.fillRect(x - 3, y - 10, 6, 20);
+            ctx.fillRect(x - 8, y + 5, 16, 5);
+
+            const now = Date.now() * 0.008;
+            const flickX = Math.sin(now * 3) * 2;
+            const flickY = Math.cos(now * 2) * 3;
+
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 18;
+
+            ctx.fillStyle = '#ff3300';
+            ctx.beginPath();
+            ctx.moveTo(x - 8, y - 10);
+            ctx.quadraticCurveTo(x + flickX, y - 35 + flickY, x + 8, y - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.moveTo(x - 4, y - 10);
+            ctx.quadraticCurveTo(x + flickX * 0.5, y - 25 + flickY, x + 4, y - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawArcher(x, y, angle) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            const isFiring = fireTimer < 100;
+
+            // 腳下陰影
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath();
+            ctx.ellipse(0, 22, 16, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 1. 飄逸的暗紅破損斗篷 (Crimson Cloak)
+            ctx.fillStyle = '#3b0d11'; 
+            ctx.strokeStyle = '#120406';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-8, -12);
+            ctx.quadraticCurveTo(-28, 5, -24, 24);
+            ctx.lineTo(-6, 18);
+            ctx.quadraticCurveTo(-12, 0, 0, -12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 2. 雙腿與戰術鋼靴
+            ctx.fillStyle = '#1c1c24'; 
+            ctx.fillRect(-8, 5, 6, 16);
+            ctx.fillRect(2, 5, 6, 16);
+
+            ctx.fillStyle = '#0d0d12'; 
+            ctx.fillRect(-9, 17, 8, 7);
+            ctx.fillRect(1, 17, 8, 7);
+
+            // 3. 背部皮革箭筒與發光箭矢
+            ctx.save();
+            ctx.rotate(-0.3);
+            ctx.fillStyle = '#4a3324'; 
+            ctx.fillRect(-18, -25, 10, 26);
+            ctx.strokeStyle = '#22140c';
+            ctx.strokeRect(-18, -25, 10, 26);
+
+            ctx.strokeStyle = '#ff3300';
+            ctx.lineWidth = 2;
+            for (let i = -16; i <= -10; i += 3) {
+                ctx.beginPath();
+                ctx.moveTo(i, -25);
+                ctx.lineTo(i - 2, -34);
+                ctx.stroke();
+                ctx.fillStyle = '#ffaa00';
+                ctx.beginPath(); ctx.arc(i - 2, -34, 2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.restore();
+
+            // 4. 軀幹與護甲胸背背帶
+            ctx.fillStyle = '#2d2d38'; 
+            ctx.beginPath();
+            ctx.moveTo(-10, -15);
+            ctx.lineTo(10, -15);
+            ctx.lineTo(8, 8);
+            ctx.lineTo(-8, 8);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#63432b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-9, -13); ctx.lineTo(7, 6);
+            ctx.moveTo(9, -13); ctx.lineTo(-7, 6);
+            ctx.stroke();
+
+            ctx.fillStyle = '#18120c';
+            ctx.fillRect(-9, 4, 18, 4);
+            ctx.fillStyle = '#d4af37';
+            ctx.fillRect(-3, 3, 6, 6);
+
+            // 左金屬肩甲
+            ctx.fillStyle = '#555660';
+            ctx.beginPath(); ctx.arc(-10, -14, 6, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#111'; ctx.lineWidth = 1; ctx.stroke();
+
+            // 5. 隨瞄準旋轉的手臂與廢土複合弓 (Composite Energy Bow)
+            ctx.save();
+            ctx.translate(0, -10); 
+            ctx.rotate(angle);
+
+            // 後手臂 (拉弦手)
+            ctx.fillStyle = '#2d2d38';
+            ctx.fillRect(-12, -3, 12, 6);
+            ctx.fillStyle = '#111'; 
+            ctx.beginPath(); ctx.arc(-12, 0, 3.5, 0, Math.PI*2); ctx.fill();
+
+            // 前手臂 (握弓手)
+            ctx.fillStyle = '#3a3a47';
+            ctx.fillRect(0, -3, 20, 6);
+            ctx.fillStyle = '#111'; 
+            ctx.beginPath(); ctx.arc(20, 0, 4, 0, Math.PI*2); ctx.fill();
+
+            // 複合弓體與動態能量弦
+            ctx.save();
+            ctx.translate(20, 0); 
+
+            ctx.strokeStyle = '#8a2be2'; 
+            ctx.shadowColor = '#a855f7';
+            ctx.shadowBlur = 8;
+            ctx.lineWidth = 3.5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(8, -25, -6, -42); 
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(8, 25, -6, 42);  
+            ctx.stroke();
+
+            ctx.fillStyle = '#333';
+            ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(-6, -42, 3.5, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(-6, 42, 3.5, 0, Math.PI*2); ctx.fill();
+
+            // 發光能量弓弦
+            ctx.strokeStyle = '#00ffff'; 
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 10;
+            ctx.lineWidth = 1.5;
+
+            const pullBack = isFiring ? -5 : -22; 
+
+            ctx.beginPath();
+            ctx.moveTo(-6, -42);
+            ctx.lineTo(pullBack, 0);
+            ctx.lineTo(-6, 42);
+            ctx.stroke();
+
+            // 待射擊箭矢
+            ctx.fillStyle = '#8b5a2b'; 
+            ctx.fillRect(pullBack, -1.5, 32, 3);
+            ctx.fillStyle = '#ff2200'; 
+            ctx.shadowColor = '#ff2200';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(pullBack + 32, -4);
+            ctx.lineTo(pullBack + 40, 0);
+            ctx.lineTo(pullBack + 32, 4);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore(); 
+            ctx.restore(); 
+
+            // 6. 兜帽與發光紅眼 (Crimson Hood & Glowing Eyes)
+            ctx.fillStyle = '#5a1820'; 
+            ctx.beginPath();
+            ctx.arc(0, -22, 11, Math.PI * 0.8, Math.PI * 2.2);
+            ctx.lineTo(0, -11);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#0a0507';
+            ctx.beginPath();
+            ctx.ellipse(2, -21, 7, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ff2200';
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 8;
+            ctx.beginPath(); ctx.arc(4, -22, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(7, -22, 1.5, 0, Math.PI*2); ctx.fill();
+
+            ctx.restore();
+        }
+
+        function gameLoop(timestamp) {
+            if (gameState !== 'PLAYING') return;
+            
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            totalGameTime += dt;
+            mathTimer += dt * 1000;
+            spawnTimer += dt * 1000;
+            fireTimer += dt * 1000;
+
+            if (mathTimer >= MATH_INTERVAL) {
+                triggerMathEvent();
+                return; 
+            }
+
+            let currentSpawnDelay = spawnRate * spawnRateMultiplier;
+            if (skillCharges > 0) currentSpawnDelay = 350; 
+
+            if (spawnTimer >= currentSpawnDelay) {
+                spawnEnemy();
+                spawnTimer = 0;
+            }
+
+            const archerX = 140;
+            const archerY = canvas.height - 400;
+
+            if (fireTimer >= fireRate) {
+                if (mouseX > archerX - 50) {
+                    arrows.push(new Arrow(archerX, archerY - 5, mouseX, mouseY));
+                    playShootSound();
+                    fireTimer = 0;
+                }
+            }
+
+            arrows.forEach(arrow => arrow.update(dt));
+            enemies.forEach(enemy => enemy.update(dt));
+            particles.forEach(p => p.update(dt));
+
+            for (let i = arrows.length - 1; i >= 0; i--) {
+                const a = arrows[i];
+                let hit = false;
+
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const e = enemies[j];
+                    const eLeft = e.x - e.width/2;
+                    const eRight = e.x + e.width/2;
+                    const eTop = e.y - (e.type === 'dragon' ? e.height/2 : e.height);
+                    const eBottom = e.y + (e.type === 'dragon' ? e.height/2 : 0);
+
+                    if (a.x >= eLeft && a.x <= eRight && a.y >= eTop && a.y <= eBottom) {
+                        e.hp -= a.damage;
+                        playHitSound();
+                        showFloatingText(e.x, e.y - 20, `-${a.damage}`);
+                        
+                        let pColor = '#8fa362';
+                        if (e.type === 'dragon') pColor = '#00e5ff'; 
+                        if (e.type === 'elite') pColor = '#8a6bb0';
+                        createParticles(a.x, a.y, pColor, 12); 
+                        hit = true;
+
+                        if (e.hp <= 0) {
+                            let pts = 100;
+                            if (e.type === 'dragon') pts = 150;
+                            if (e.type === 'elite') pts = 250;
+                            
+                            addScore(pts);
+                            createParticles(e.x, e.y - (e.type==='dragon'?0:e.height/2), pColor, 30);
+                            e.active = false;
+                        }
+                        break; 
+                    }
+                }
+                
+                if (a.y > canvas.height - 100 && a.active) {
+                    hit = true;
+                    createParticles(a.x, a.y, '#666', 8); 
+                }
+                if (hit) a.active = false;
+            }
+
+            arrows = arrows.filter(a => a.active);
+            enemies = enemies.filter(e => e.active);
+            particles = particles.filter(p => p.active);
+
+            drawBackground();
+            updateAndDrawEmbers(dt);
+            enemies.forEach(e => e.draw(ctx));
+            drawTower();
+            
+            const aimAngle = Math.atan2(mouseY - (archerY - 5), mouseX - archerX);
+            drawArcher(archerX, archerY, aimAngle);
+
+            arrows.forEach(a => a.draw(ctx));
+            particles.forEach(p => p.draw(ctx));
+
+            if (flashAlpha > 0) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${flashAlpha})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                flashAlpha -= dt * 1.5; 
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            initAudio();
+            startModal.style.display = 'none';
+            resetGame();
+        }
+
+        function resetGame() {
+            sysModal.style.display = 'none';
+            mathModal.style.display = 'none';
+            
+            gameState = 'PLAYING';
+            score = 0;
+            hearts = 3;
+            nextHeartScore = 2000;
+            mathCombo = 0;
+            skillCharges = 0;
+            
+            arrowDamage = 20; 
+            arrows = [];
+            enemies = [];
+            particles = [];
+            mathTimer = 0;
+            spawnTimer = 0;
+            fireTimer = 0;
+            totalGameTime = 0;
+            spawnRate = 4000;
+            baseSpawnRateBonus = 0;
+            flashAlpha = 0;
+            spawnRateMultiplier = 1.0;
+            enemySpeedMultiplier = 1.0;
+            
+            initEmbers();
+            updateUI();
+            
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameOver() {
+            gameState = 'GAME_OVER';
+            finalScoreSpan.textContent = score;
+            sysModal.style.display = 'flex';
+        }
+
+        window.onload = function() {
+            initEmbers();
+            drawBackground();
+            drawTower();
+            drawArcher(140, canvas.height - 400, 0);
+        }
+    </script>
+</body>
+</html>
