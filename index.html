@@ -92,6 +92,39 @@
             font-size: 1.5rem !important;
         }
 
+        /* 當前能力徽章展示區 */
+        #abilities-container {
+            position: absolute;
+            top: 100px;
+            left: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-width: 550px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ability-badge {
+            background: var(--parchment);
+            border: 2px solid var(--wood-border);
+            outline: 1px solid #c89f59;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--ink);
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .ability-badge span {
+            color: #8b0000;
+        }
+
         #skill-container {
             position: absolute;
             bottom: 20px;
@@ -167,57 +200,157 @@
         .modal-content {
             background: var(--panel-bg);
             border: 2px solid #666;
-            padding: 40px;
+            padding: 30px 20px;
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 0 50px rgba(0, 0, 0, 1), 0 0 20px rgba(139, 0, 0, 0.6);
-            max-width: 550px;
-            width: 90%;
+            max-width: 920px;
+            width: 95%;
             pointer-events: auto;
         }
 
         .modal-title {
             font-size: 2.2rem;
             color: var(--primary);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-shadow: 0 0 10px rgba(139, 0, 0, 0.8);
             font-weight: bold;
         }
 
-        #math-equation {
-            font-size: 3.5rem;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 25px 0;
-            color: var(--gold);
-            letter-spacing: 3px;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        /* 三卡片佈局樣式 */
+        .cards-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
         }
 
-        .options-grid {
+        .card-box {
+            background: rgba(18, 18, 24, 0.95);
+            border: 2px solid var(--wood-border);
+            border-radius: 8px;
+            padding: 15px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            transition: all 0.2s ease;
+        }
+
+        .card-box:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .card-title.apprentice { color: #66ff66; }
+        .card-title.warrior { color: #ffd700; }
+        .card-title.hero { color: #ff55ff; }
+
+        .card-reward {
+            font-size: 0.85rem;
+            color: #7cfc00;
+            font-weight: bold;
+            background: rgba(0,0,0,0.4);
+            padding: 8px;
+            border-radius: 4px;
+            margin: 6px 0;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.3;
+        }
+
+        .card-eq {
+            font-size: 1.4rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--gold);
+            font-weight: bold;
+            margin: 6px 0;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+        }
+
+        .card-hint {
+            font-size: 0.82rem;
+            color: #00e5ff;
+            font-family: monospace;
+            font-weight: bold;
+            min-height: 22px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .card-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 30px;
+            gap: 6px;
         }
 
-        .option-btn {
+        .card-opt-btn {
             background: linear-gradient(to bottom, #444, #222);
             color: white;
-            border: 2px solid #777;
-            padding: 20px;
-            font-size: 1.8rem;
-            border-radius: 8px;
+            border: 1px solid #777;
+            padding: 8px 2px;
+            font-size: 1.2rem;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
             font-weight: bold;
             font-family: 'Courier New', Courier, monospace;
+            transition: all 0.2s ease;
         }
 
-        .option-btn:hover {
+        .card-opt-btn:hover:not(:disabled) {
             background: linear-gradient(to bottom, #555, #333);
             border-color: var(--gold);
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            transform: scale(1.04);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .card-opt-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tool-btn {
+            background: linear-gradient(to bottom, #333, #111);
+            color: var(--gold);
+            border: 2px solid var(--wood-border);
+            padding: 8px 18px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .tool-btn:hover:not(:disabled) {
+            background: linear-gradient(to bottom, #444, #222);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .tool-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #555;
+            color: #888;
         }
 
         .btn-primary {
@@ -255,6 +388,55 @@
         .dmg-player { color: #ff0000; font-size: 2.5rem; text-shadow: 0 0 10px red, 2px 2px 5px black; }
         .heal-text { color: #ff3333; font-size: 2rem; text-shadow: 0 0 10px pink, 2px 2px 5px black; }
 
+        /* 分數樣式 */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 0.85em;
+            margin: 0 6px;
+            line-height: 1.1;
+        }
+
+        .frac .num {
+            border-bottom: 2px solid var(--gold);
+            padding: 0 4px 2px 4px;
+        }
+
+        .frac .den {
+            padding: 2px 4px 0 4px;
+        }
+
+        /* 解法垂直對齊網格 */
+        .solution-grid {
+            display: inline-grid;
+            grid-template-columns: auto auto auto;
+            gap: 6px 14px;
+            align-items: center;
+            font-size: 1.4rem;
+            color: var(--gold);
+            margin-top: 10px;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+        }
+
+        .sol-lhs {
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .sol-eq {
+            text-align: center;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 0 2px;
+        }
+
+        .sol-rhs {
+            text-align: left;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-60px) scale(1.3); opacity: 0; }
@@ -272,7 +454,7 @@
                 <span id="ui-hp">❤️❤️❤️</span>
             </div>
             <div class="stat-box">
-                分數
+                數學幣
                 <span id="ui-score">0</span>
             </div>
             <div class="stat-box">
@@ -281,40 +463,95 @@
             </div>
         </div>
 
+        <!-- 介面當前能力展示 (無能力則自動隱藏) -->
+        <div id="abilities-container"></div>
+
         <div id="skill-container">
             <div id="combo-text">連續答對: 0/3</div>
             <button id="skill-btn" class="skill-btn" onclick="useSkill()">聖光救世 (0)</button>
         </div>
 
+        <!-- 數學挑戰 (三張題卡) 彈窗 -->
         <div id="math-modal" class="modal-overlay">
             <div class="modal-content">
-                <div class="modal-title">數學挑戰！</div>
-                <p style="font-size: 1.2rem; color: #ddd;">解開方程永久提升傷害。<br>連續答對 3 題獲得清屏技能！</p>
-                <div id="math-equation">x + 1 = 5</div>
-                <div class="options-grid" id="math-options"></div>
+                <div class="modal-title" id="math-modal-title">數學挑戰！</div>
+                <p id="math-modal-desc" style="font-size: 1.1rem; color: #ddd; margin: 0 0 10px 0;">選擇一張題卡進入答題介面！</p>
+                
+                <div class="cards-container" id="cards-wrapper">
+                    <!-- 三張卡片由 JavaScript 動態渲染 -->
+                </div>
+
+                <!-- 點選卡片後的答題區 (初始隱藏) -->
+                <div id="answer-wrapper" style="display: none; flex-direction: column; align-items: center;">
+                    <!-- 動態插入題目與選項 -->
+                </div>
+
+                <!-- 提示與換題按鈕 (進入答題區才顯示) -->
+                <div id="math-tools" style="margin-top: 18px; display: none; justify-content: center; gap: 20px;">
+                    <button id="btn-hint" class="tool-btn" onclick="useHint()">💡 提示 (100幣)</button>
+                    <button id="btn-reroll" class="tool-btn" onclick="useReroll()">🔄 換題 (150幣)</button>
+                </div>
             </div>
         </div>
 
         <div id="sys-modal" class="modal-overlay">
-            <div class="modal-content" id="message-box">
+            <div class="modal-content" id="message-box" style="max-width: 550px;">
                 <div id="message-title" class="modal-title">GAME OVER</div>
                 <p style="font-size: 1.2rem; margin-bottom: 20px;">怪物攻陷了你的城堡，你失去了所有生命。</p>
-                <p style="font-size: 1.5rem;">最終分數: <span id="final-score" style="color:var(--gold); font-weight:bold; font-size: 2rem;">0</span></p>
+                <p style="font-size: 1.5rem;">最終數學幣: <span id="final-score" style="color:var(--gold); font-weight:bold; font-size: 2rem;">0</span></p>
                 <button class="btn-primary" onclick="resetGame()">重新開始</button>
             </div>
         </div>
         
         <div id="start-modal" class="modal-overlay" style="display: flex;">
-            <div class="modal-content">
+            <div class="modal-content" style="max-width: 580px;">
                 <div class="modal-title" style="font-size: 2.8rem; text-transform: uppercase;">Math Defender</div>
                 <p style="font-size: 1.3rem; color: #ccc;">保衛城堡，抵禦殭屍與飛龍大軍！</p>
                 <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; color: #bbb;">
                     <p style="margin: 5px 0;">🎯 <b>自動射擊：</b> 箭矢會自動連續射向滑鼠位置。</p>
-                    <p style="margin: 5px 0;">❤️ <b>生命系統：</b> 初始 3 顆心，被攻擊扣 1 顆，每 2000 分回復 1 顆。</p>
-                    <p style="margin: 5px 0; color: #66ff66;">📐 <b>數學挑戰：</b> 答對傷害 +30，2秒後怪物會加速湧出；答錯怪物會短暫暴走！</p>
+                    <p style="margin: 5px 0;">❤️ <b>生命系統：</b> 初始 3 顆心，被攻擊扣 1 顆，每 2000 數學幣回復 1 顆。</p>
+                    <p style="margin: 5px 0; color: #66ff66;">📐 <b>三題卡挑戰：</b> 可選學徒、戰士或英雄卡作答！獲得基礎傷害、屬性加成或強大神技！</p>
                     <p style="margin: 5px 0; color: #bf00ff;">⚠️ <b>特殊精英怪：</b> 第 10 秒後將出現高血量高速度的紫色精英怪！</p>
+                    <p style="margin: 5px 0; color: #00e5ff;">🛠️ <b>開發者測試：</b> 遊戲中可隨時按鍵盤 <b>X</b> 鍵開關開發者面板。</p>
                 </div>
                 <button class="btn-primary" onclick="startGame()">開始遊戲</button>
+            </div>
+        </div>
+
+        <!-- 開發者模式面板 -->
+        <div id="dev-modal" class="modal-overlay" style="z-index: 200;">
+            <div class="modal-content" style="max-width: 420px; padding: 25px; text-align: left; background: var(--panel-bg); border: 2px solid var(--gold);">
+                <div class="modal-title" style="font-size: 1.8rem; color: var(--gold); margin-bottom: 15px; text-align: center;">🛠️ 開發者測試面板</div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 6px; color: #eee;">即時生成怪物種類與數量：</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <select id="dev-enemy-type" style="flex: 2; padding: 8px; background: #222; color: #fff; border: 1px solid #666; border-radius: 6px; font-size: 1rem;">
+                            <option value="zombie">一般殭屍 (Zombie)</option>
+                            <option value="elite">精英殭屍 (Elite Zombie)</option>
+                            <option value="dragon">骨龍 (Dragon)</option>
+                        </select>
+                        <input type="number" id="dev-enemy-count" value="1" min="1" max="20" style="flex: 1; padding: 8px; background: #222; color: #fff; border: 1px solid #666; border-radius: 6px; font-size: 1rem; text-align: center;">
+                    </div>
+                    <button class="tool-btn" style="width: 100%;" onclick="devSpawnEnemy()">⚡ 立即生成怪物</button>
+                </div>
+
+                <div style="margin-bottom: 15px; border-top: 1px solid #444; padding-top: 15px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 6px; color: #eee;">修改數學幣數量：</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="dev-coin-amount" value="1000" step="100" style="flex: 2; padding: 8px; background: #222; color: #fff; border: 1px solid #666; border-radius: 6px; font-size: 1rem;">
+                        <button class="tool-btn" style="flex: 1;" onclick="devSetCoins()">套用</button>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px; border-top: 1px solid #444; padding-top: 15px; display: flex; gap: 10px;">
+                    <button class="tool-btn" style="flex: 1; color: #ff6666; border-color: #ff4444;" onclick="devClearEnemies()">🧹 清空怪物</button>
+                    <button class="tool-btn" style="flex: 1; color: #66ff66; border-color: #44ff44;" onclick="devAddSkillCharge()">✨ +1 聖光充能</button>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn-primary" style="padding: 8px 25px; font-size: 1rem; margin-top: 0;" onclick="toggleDevPanel()">關閉面板 (X)</button>
+                </div>
             </div>
         </div>
     </div>
@@ -367,9 +604,8 @@
         const uiDmg = document.getElementById('ui-dmg');
         const uiCombo = document.getElementById('combo-text');
         const uiSkillBtn = document.getElementById('skill-btn');
+        const abilitiesContainer = document.getElementById('abilities-container');
         const mathModal = document.getElementById('math-modal');
-        const mathEquation = document.getElementById('math-equation');
-        const mathOptions = document.getElementById('math-options');
         const sysModal = document.getElementById('sys-modal');
         const startModal = document.getElementById('start-modal');
         const finalScoreSpan = document.getElementById('final-score');
@@ -378,18 +614,32 @@
         const TOWER_WIDTH = 140;
         const MATH_INTERVAL = 15000; 
         
+        const HINT_COST = 100;
+        const REROLL_COST = 150;
+        
         let gameState = 'START'; 
         let lastTime = 0;
+        let devPanelOpen = false;
         
-        let score = 0;
+        let score = 0; // 數學幣
         let hearts = 3;
         let nextHeartScore = 2000;
         let mathCombo = 0;
         let skillCharges = 0;
         let flashAlpha = 0; 
         
+        // 遊戲狀態與挑戰系統相關變數
+        let consecutiveWrongAnswers = 0; 
+        let heroDefeated = false; 
+
+        // 玩家戰鬥屬性
         let arrowDamage = 20; 
         let arrowSpeed = 1500; 
+        let critRate = 0.0;      // 暴擊率
+        let knockbackPower = 0; // 擊退能力
+        let fireRateBonus = 0.0; // 射速加成 (%)
+        let splitLevel = 0;     // 分裂箭等級 (0=1箭, 1=2箭, 2=3箭, 3=5箭)
+        let pierceLevel = 0;    // 穿透等級 (0=不穿透)
         
         let arrows = [];
         let enemies = [];
@@ -411,7 +661,71 @@
         let fireTimer = 0;
         let fireRate = 400; 
         let totalGameTime = 0; 
-        let currentMathAnswer = null;
+
+        // 儲存當前三張卡片的生成資料
+        let currentCardsData = [];
+        let activeCardIndex = -1; // 記錄當前進入答題階段的卡片索引
+
+        // 開發者模式快捷鍵開關 (按 X 鍵)
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'x' || e.key === 'X') {
+                if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
+                    return;
+                }
+                toggleDevPanel();
+            }
+        });
+
+        function toggleDevPanel() {
+            const devModal = document.getElementById('dev-modal');
+            devPanelOpen = !devPanelOpen;
+            if (devPanelOpen) {
+                document.getElementById('dev-coin-amount').value = score;
+                devModal.style.display = 'flex';
+            } else {
+                devModal.style.display = 'none';
+            }
+        }
+
+        function devSpawnEnemy() {
+            const type = document.getElementById('dev-enemy-type').value;
+            const count = parseInt(document.getElementById('dev-enemy-count').value) || 1;
+            let difficultyMultiplier = 1 + (totalGameTime / 60);
+
+            for (let i = 0; i < count; i++) {
+                let enemy;
+                if (type === 'elite') {
+                    enemy = new EliteZombie(difficultyMultiplier);
+                } else if (type === 'dragon') {
+                    enemy = new Dragon(difficultyMultiplier);
+                } else {
+                    enemy = new Zombie(difficultyMultiplier);
+                }
+                enemy.x += i * 35;
+                enemies.push(enemy);
+            }
+            showFloatingText(canvas.width / 2, canvas.height / 2, `生成 ${count} 隻 ${type}`, "heal-text");
+        }
+
+        function devSetCoins() {
+            const amount = parseInt(document.getElementById('dev-coin-amount').value);
+            if (!isNaN(amount) && amount >= 0) {
+                score = amount;
+                updateUI();
+                showFloatingText(canvas.width / 2, canvas.height / 2, `數學幣設定為 ${score}`, "heal-text");
+            }
+        }
+
+        function devClearEnemies() {
+            enemies = [];
+            showFloatingText(canvas.width / 2, canvas.height / 2, "全場怪物已清空", "heal-text");
+        }
+
+        function devAddSkillCharge() {
+            skillCharges++;
+            updateUI();
+            showFloatingText(canvas.width / 2, canvas.height / 2, "+1 聖光充能", "heal-text");
+        }
 
         function initEmbers() {
             embers = [];
@@ -447,29 +761,80 @@
         }
 
         function drawSegmentedHpBar(ctx, x, y, width, height, currentHp, maxHp) {
+            ctx.save();
+            // 黑色外框與底色
             ctx.fillStyle = '#000';
             ctx.fillRect(x - 2, y - 2, width + 4, height + 4); 
-            
-            const segments = 5;
-            const segmentWidth = (width - (segments - 1)) / segments;
-            const hpRatio = Math.max(0, currentHp / maxHp);
-            const activeSegments = Math.ceil(hpRatio * segments);
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x, y, width, height);
 
-            for(let i=0; i<segments; i++) {
-                const segX = x + i * (segmentWidth + 1);
-                if (i < activeSegments) {
+            // 計算精確血量比例與填滿寬度
+            const hpRatio = Math.max(0, Math.min(1, currentHp / maxHp));
+            const fillWidth = width * hpRatio;
+
+            if (fillWidth > 0) {
+                if (hpRatio > 0.5) {
                     ctx.fillStyle = '#32cd32';
+                } else if (hpRatio > 0.25) {
+                    ctx.fillStyle = '#ffd700';
                 } else {
-                    ctx.fillStyle = '#222'; 
+                    ctx.fillStyle = '#ff3333';
                 }
-                ctx.fillRect(segX, y, segmentWidth, height);
+                ctx.fillRect(x, y, fillWidth, height);
             }
+
+            // 繪製 5 格分隔線，維持經典格裝 UI 視覺
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.lineWidth = 1;
+            const segments = 5;
+            const segmentWidth = width / segments;
+            for (let i = 1; i < segments; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x + i * segmentWidth, y);
+                ctx.lineTo(x + i * segmentWidth, y + height);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function segmentIntersectsAABB(x0, y0, x1, y1, minX, maxX, minY, maxY) {
+            if ((x0 >= minX && x0 <= maxX && y0 >= minY && y0 <= maxY) ||
+                (x1 >= minX && x1 <= maxX && y1 >= minY && y1 <= maxY)) {
+                return true;
+            }
+            if (Math.max(x0, x1) < minX || Math.min(x0, x1) > maxX ||
+                Math.max(y0, y1) < minY || Math.min(y0, y1) > maxY) {
+                return false;
+            }
+            let dx = x1 - x0;
+            let dy = y1 - y0;
+            let t0 = 0.0, t1 = 1.0;
+            let p = [-dx, dx, -dy, dy];
+            let q = [x0 - minX, maxX - x0, y0 - minY, maxY - y0];
+
+            for (let k = 0; k < 4; k++) {
+                if (p[k] === 0) {
+                    if (q[k] < 0) return false;
+                } else {
+                    let r = q[k] / p[k];
+                    if (p[k] < 0) {
+                        if (r > t1) return false;
+                        if (r > t0) t0 = r;
+                    } else {
+                        if (r < t0) return false;
+                        if (r < t1) t1 = r;
+                    }
+                }
+            }
+            return t0 <= t1;
         }
 
         class Arrow {
-            constructor(startX, startY, targetX, targetY) {
+            constructor(startX, startY, targetX, targetY, maxPierce = 0, decayRate = 0.20) {
                 this.x = startX;
                 this.y = startY;
+                this.prevX = startX;
+                this.prevY = startY;
                 this.damage = arrowDamage;
                 const dx = targetX - startX;
                 const dy = targetY - startY;
@@ -485,9 +850,17 @@
                 this.active = true;
                 this.length = 35;
                 this.history = []; 
+                
+                this.maxPierce = maxPierce; 
+                this.decayRate = decayRate; 
+                this.hitsCount = 0;
+                this.hitEnemies = new Set(); 
             }
 
             update(dt) {
+                this.prevX = this.x;
+                this.prevY = this.y;
+
                 this.history.push({x: this.x, y: this.y});
                 if(this.history.length > 8) this.history.shift();
 
@@ -508,7 +881,7 @@
                     for(let i=1; i<this.history.length; i++) {
                         ctx.lineTo(this.history[i].x, this.history[i].y);
                     }
-                    ctx.strokeStyle = 'rgba(255, 100, 50, 0.5)';
+                    ctx.strokeStyle = this.maxPierce > 0 ? 'rgba(0, 229, 255, 0.6)' : 'rgba(255, 100, 50, 0.5)';
                     ctx.lineWidth = 3;
                     ctx.stroke();
                 }
@@ -519,11 +892,11 @@
                 
                 ctx.fillStyle = '#8b5a2b';
                 ctx.fillRect(-this.length, -1.5, this.length, 3);
-                ctx.fillStyle = '#ff3300';
+                ctx.fillStyle = this.maxPierce > 0 ? '#00e5ff' : '#ff3300';
                 ctx.beginPath(); ctx.moveTo(-this.length, -1.5); ctx.lineTo(-this.length - 6, -5); ctx.lineTo(-this.length + 3, -1.5); ctx.fill();
                 ctx.beginPath(); ctx.moveTo(-this.length, 1.5); ctx.lineTo(-this.length - 6, 5); ctx.lineTo(-this.length + 3, 1.5); ctx.fill();
                 ctx.fillStyle = '#fff';
-                ctx.shadowColor = '#ff2200';
+                ctx.shadowColor = this.maxPierce > 0 ? '#00e5ff' : '#ff2200';
                 ctx.shadowBlur = 6;
                 ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-8, -4); ctx.lineTo(-8, 4); ctx.fill();
                 
@@ -772,7 +1145,7 @@
                 ctx.restore();
                 ctx.restore();
                 
-                drawSegmentedHpBar(ctx, this.x - this.width/2 - 10, this.y - this.height - 25, 60, 6, this.hp, this.maxHp);
+                drawSegmentedHpBar(ctx, this.x - 30, this.y - 120, 60, 6, this.hp, this.maxHp);
             }
         }
 
@@ -889,7 +1262,7 @@
                 ctx.restore();
                 ctx.restore();
                 
-                drawSegmentedHpBar(ctx, this.x - this.width/2 - 10, this.y - this.height - 25, 65, 8, this.hp, this.maxHp);
+                drawSegmentedHpBar(ctx, this.x - 32, this.y - 130, 65, 8, this.hp, this.maxHp);
             }
         }
 
@@ -1097,7 +1470,7 @@
 
                 ctx.restore();
                 
-                drawSegmentedHpBar(ctx, this.x - 25, this.y - 65, 50, 6, this.hp, this.maxHp);
+                drawSegmentedHpBar(ctx, this.x - 25, this.y - 50, 50, 6, this.hp, this.maxHp);
             }
         }
 
@@ -1174,6 +1547,13 @@
             updateUI();
         }
 
+        function updateToolButtons() {
+            const btnHint = document.getElementById('btn-hint');
+            const btnReroll = document.getElementById('btn-reroll');
+            if (btnHint) btnHint.disabled = (score < HINT_COST);
+            if (btnReroll) btnReroll.disabled = (score < REROLL_COST);
+        }
+
         function updateUI() {
             if (hearts <= 7) {
                 uiHp.textContent = '❤️'.repeat(hearts) || '防禦崩潰';
@@ -1186,81 +1566,518 @@
             uiSkillBtn.textContent = `聖光救世 (${skillCharges})`;
             if (skillCharges > 0) uiSkillBtn.classList.add('ready');
             else uiSkillBtn.classList.remove('ready');
+
+            // 更新當前能力顯示清單（若無則自動隱藏）
+            if (abilitiesContainer) {
+                let buffsHtml = '';
+                if (critRate > 0) {
+                    buffsHtml += `<div class="ability-badge">🎯 暴擊率 <span>+${Math.round(critRate * 100)}%</span></div>`;
+                }
+                if (fireRateBonus > 0) {
+                    buffsHtml += `<div class="ability-badge">⚡ 攻速 <span>+${Math.round(fireRateBonus * 100)}%</span></div>`;
+                }
+                if (splitLevel > 0) {
+                    const totalArrows = splitLevel === 1 ? 2 : (splitLevel === 2 ? 3 : 5);
+                    buffsHtml += `<div class="ability-badge">🏹 分裂箭 <span>Lv.${splitLevel} (${totalArrows}箭)</span></div>`;
+                }
+                if (pierceLevel > 0) {
+                    buffsHtml += `<div class="ability-badge">🗡️ 穿透 <span>Lv.${pierceLevel}</span></div>`;
+                }
+                if (knockbackPower > 0) {
+                    buffsHtml += `<div class="ability-badge">💨 擊退力 <span>+${knockbackPower}</span></div>`;
+                }
+                abilitiesContainer.innerHTML = buffsHtml;
+            }
+
+            updateToolButtons();
+        }
+
+        // 產生選項 (絕不出 0 或負數，答案必為正整數)
+        function generateOptions(answer) {
+            let options = [answer];
+            let offsets = [-3, -2, -1, 1, 2, 3, 4, 5, -4, -5].sort(() => Math.random() - 0.5);
+            for (let offset of offsets) {
+                if (options.length >= 4) break;
+                let wrong = answer + offset;
+                if (wrong > 0 && !options.includes(wrong)) {
+                    options.push(wrong);
+                }
+            }
+            while (options.length < 4) {
+                let wrong = answer + Math.floor(Math.random() * 10) + 1;
+                if (wrong > 0 && !options.includes(wrong)) {
+                    options.push(wrong);
+                }
+            }
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        // 分數 HTML 輔助函式
+        function makeFrac(num, den) {
+            return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+        }
+
+        // 產生單張卡片數據，支援對齊步驟與動態難度升級
+        function generateSingleCardData(diff) {
+            let equationHTML = "";
+            let answer = 1;
+            let steps = [];
+            let hintStep1 = "";
+            let cardName = "";
+            let titleClass = "";
+            let rewardText = "";
+
+            if (diff === 1) {
+                cardName = "【學徒(簡單)】";
+                titleClass = "apprentice";
+                rewardText = "獎勵：基礎傷害增加";
+            } else if (diff === 2) {
+                cardName = "【戰士(普通) 】";
+                titleClass = "warrior";
+                rewardText = "獎勵：基礎傷害小量增加 & 能力提升(暴擊/擊退/射速)";
+            } else {
+                cardName = "【英雄(挑戰)】";
+                titleClass = "hero";
+                rewardText = "獎勵：神技 (分裂箭 / 穿透)";
+            }
+
+            // 若選擇過英雄卡且答對，將觸發題型升級機制
+            let logicLevel = heroDefeated ? diff + 1 : diff;
+
+            if (logicLevel === 1) { // 初始學徒題型
+                const type = Math.floor(Math.random() * 3);
+                answer = Math.floor(Math.random() * 12) + 1;
+
+                if (type === 0) { // x + a = b
+                    const a = Math.floor(Math.random() * 15) + 1;
+                    const b = answer + a;
+                    equationHTML = `x + ${a} = ${b}`;
+                    hintStep1 = `提示：x = ${b} - ${a}`;
+                    steps = [
+                        { lhs: `x + ${a}`, rhs: `${b}` },
+                        { lhs: `x`, rhs: `${b} - ${a}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                } else if (type === 1) { // x - a = b
+                    const a = Math.floor(Math.random() * 12) + 1;
+                    const b = answer;
+                    answer = b + a;
+                    equationHTML = `x - ${a} = ${b}`;
+                    hintStep1 = `提示：x = ${b} + ${a}`;
+                    steps = [
+                        { lhs: `x - ${a}`, rhs: `${b}` },
+                        { lhs: `x`, rhs: `${b} + ${a}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                } else { // ax = b
+                    const a = Math.floor(Math.random() * 8) + 2;
+                    const b = a * answer;
+                    equationHTML = `${a}x = ${b}`;
+                    hintStep1 = `提示：x = ${b} ÷ ${a}`;
+                    steps = [
+                        { lhs: `${a}x`, rhs: `${b}` },
+                        { lhs: `x`, rhs: `${b} ÷ ${a}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                }
+            } else if (logicLevel === 2) { // 初始戰士題 OR 升級後學徒題：ax + b = c、ax - b = c
+                const type = Math.floor(Math.random() * 2);
+                answer = Math.floor(Math.random() * 10) + 1;
+                const a = Math.floor(Math.random() * 5) + 2;
+
+                if (type === 0) { // ax + b = c
+                    const b = Math.floor(Math.random() * 12) + 1;
+                    const c = (a * answer) + b;
+                    equationHTML = `${a}x + ${b} = ${c}`;
+                    hintStep1 = `提示：${a}x = ${c} - ${b}`;
+                    steps = [
+                        { lhs: `${a}x + ${b}`, rhs: `${c}` },
+                        { lhs: `${a}x`, rhs: `${c} - ${b}` },
+                        { lhs: `${a}x`, rhs: `${c - b}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                } else { // ax - b = c
+                    const b = Math.floor(Math.random() * 8) + 1;
+                    const c = (a * answer) - b;
+                    if (c <= 0) {
+                        const cFix = (a * answer) + 2;
+                        equationHTML = `${a}x + 2 = ${cFix}`;
+                        hintStep1 = `提示：${a}x = ${cFix} - 2`;
+                        steps = [
+                            { lhs: `${a}x + 2`, rhs: `${cFix}` },
+                            { lhs: `${a}x`, rhs: `${cFix} - 2` },
+                            { lhs: `${a}x`, rhs: `${a * answer}` },
+                            { lhs: `x`, rhs: `${answer}` }
+                        ];
+                    } else {
+                        equationHTML = `${a}x - ${b} = ${c}`;
+                        hintStep1 = `提示：${a}x = ${c} + ${b}`;
+                        steps = [
+                            { lhs: `${a}x - ${b}`, rhs: `${c}` },
+                            { lhs: `${a}x`, rhs: `${c} + ${b}` },
+                            { lhs: `${a}x`, rhs: `${c + b}` },
+                            { lhs: `x`, rhs: `${answer}` }
+                        ];
+                    }
+                }
+            } else if (logicLevel === 3) { // 初始英雄題 OR 升級後戰士題：ax + b = cx + d、a(x + b) = c
+                const type = Math.floor(Math.random() * 2);
+                answer = Math.floor(Math.random() * 9) + 1;
+
+                if (type === 0) { // ax + b = cx + d
+                    const a = Math.floor(Math.random() * 5) + 4;
+                    const c = Math.floor(Math.random() * (a - 2)) + 1; 
+                    const b = Math.floor(Math.random() * 10) + 1;
+                    const d = b + (a - c) * answer;
+                    equationHTML = `${a}x + ${b} = ${c}x + ${d}`;
+                    hintStep1 = `提示：${a - c}x = ${d} - ${b}`;
+                    steps = [
+                        { lhs: `${a}x + ${b}`, rhs: `${c}x + ${d}` },
+                        { lhs: `${a}x - ${c}x`, rhs: `${d} - ${b}` },
+                        { lhs: `${a - c}x`, rhs: `${d - b}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                } else { // a(x + b) = c
+                    const a = Math.floor(Math.random() * 4) + 2;
+                    const b = Math.floor(Math.random() * 8) + 1;
+                    const c = a * (answer + b);
+                    equationHTML = `${a}(x + ${b}) = ${c}`;
+                    hintStep1 = `提示：x + ${b} = ${c} ÷ ${a}`;
+                    steps = [
+                        { lhs: `${a}(x + ${b})`, rhs: `${c}` },
+                        { lhs: `x + ${b}`, rhs: `${c} ÷ ${a}` },
+                        { lhs: `x + ${b}`, rhs: `${c / a}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                }
+            } else if (logicLevel === 4) { // 升級後英雄題：含分數方程、多重括號進階題型
+                const type = Math.floor(Math.random() * 4);
+                hintStep1 = ""; 
+
+                if (type === 0) { // x/a + x/b = c (例：x/5 + x/3 = 8)
+                    let a = Math.floor(Math.random() * 4) + 2; 
+                    let b = Math.floor(Math.random() * 4) + 2; 
+                    while (a === b) b = Math.floor(Math.random() * 4) + 2; 
+                    let mult = Math.floor(Math.random() * 3) + 1;
+                    answer = a * b * mult;
+                    let c = (answer / a) + (answer / b);
+
+                    equationHTML = `${makeFrac('x', a)} + ${makeFrac('x', b)} = ${c}`;
+                    steps = [
+                        { lhs: `${makeFrac('x', a)} + ${makeFrac('x', b)}`, rhs: `${c}` },
+                        { lhs: `${makeFrac(`${b}x + ${a}x`, a * b)}`, rhs: `${c}` },
+                        { lhs: `${b}x + ${a}x`, rhs: `${c * a * b}` },
+                        { lhs: `${a + b}x`, rhs: `${c * a * b}` },
+                        { lhs: `x`, rhs: `${answer}` }
+                    ];
+                } else if (type === 1) { // y/a + b = cy/a (例：y/7 + 6 = 3y/7)
+                    let a = Math.floor(Math.random() * 5) + 3; 
+                    let c = Math.floor(Math.random() * 3) + 2; 
+                    let mult = Math.floor(Math.random() * 4) + 1;
+                    answer = a * mult;
+                    let b = (c - 1) * mult;
+
+                    equationHTML = `${makeFrac('y', a)} + ${b} = ${makeFrac(c + 'y', a)}`;
+                    steps = [
+                        { lhs: `${makeFrac('y', a)} + ${b}`, rhs: `${makeFrac(c + 'y', a)}` },
+                        { lhs: `${b}`, rhs: `${makeFrac(c + 'y', a)} - ${makeFrac('y', a)}` },
+                        { lhs: `${b}`, rhs: `${makeFrac((c - 1) + 'y', a)}` },
+                        { lhs: `${b * a}`, rhs: `${c - 1}y` },
+                        { lhs: `y`, rhs: `${answer}` }
+                    ];
+                } else if (type === 2) { // a(bk + c) - d = e(k + f) (例：2 (2k + 3) – 5 = 3 (k + 7))
+                    let a = Math.floor(Math.random() * 3) + 2;
+                    let b = Math.floor(Math.random() * 3) + 2;
+                    let e = Math.floor(Math.random() * 3) + 2;
+                    while (a * b === e) e = Math.floor(Math.random() * 3) + 2;
+
+                    let c = Math.floor(Math.random() * 4) + 1;
+                    let f = Math.floor(Math.random() * 5) + 1;
+                    answer = Math.floor(Math.random() * 6) + 2;
+
+                    let leftVal = a * (b * answer + c);
+                    let rightVal = e * (answer + f);
+                    let d = leftVal - rightVal;
+
+                    if (d >= 0) {
+                        equationHTML = `${a}(${b}k + ${c}) – ${d} = ${e}(k + ${f})`;
+                        steps = [
+                            { lhs: `${a}(${b}k + ${c}) – ${d}`, rhs: `${e}(k + ${f})` },
+                            { lhs: `${a * b}k + ${a * c} – ${d}`, rhs: `${e}k + ${e * f}` },
+                            { lhs: `${a * b}k ${a * c - d >= 0 ? '+ ' + (a * c - d) : '– ' + Math.abs(a * c - d)}`, rhs: `${e}k + ${e * f}` },
+                            { lhs: `${a * b - e}k`, rhs: `${e * f - (a * c - d)}` },
+                            { lhs: `k`, rhs: `${answer}` }
+                        ];
+                    } else {
+                        let absD = Math.abs(d);
+                        equationHTML = `${a}(${b}k + ${c}) + ${absD} = ${e}(k + ${f})`;
+                        steps = [
+                            { lhs: `${a}(${b}k + ${c}) + ${absD}`, rhs: `${e}(k + ${f})` },
+                            { lhs: `${a * b}k + ${a * c} + ${absD}`, rhs: `${e}k + ${e * f}` },
+                            { lhs: `${a * b}k + ${a * c + absD}`, rhs: `${e}k + ${e * f}` },
+                            { lhs: `${a * b - e}k`, rhs: `${e * f - (a * c + absD)}` },
+                            { lhs: `k`, rhs: `${answer}` }
+                        ];
+                    }
+                } else { // –a(b – a) – c = –da (例：–2 (3 – a) – 6 = –4a)
+                    let A = Math.floor(Math.random() * 3) + 2;
+                    let B = Math.floor(Math.random() * 3) + 2;
+                    let D = Math.floor(Math.random() * 3) + 2;
+                    answer = Math.floor(Math.random() * 5) + 1;
+                    let C = (A + D) * answer - A * B;
+                    if (C <= 0) {
+                        C = 6;
+                        answer = Math.ceil((A * B + C) / (A + D));
+                        C = (A + D) * answer - A * B;
+                    }
+
+                    equationHTML = `–${A}(${B} – a) – ${C} = –${D}a`;
+                    steps = [
+                        { lhs: `–${A}(${B} – a) – ${C}`, rhs: `–${D}a` },
+                        { lhs: `–${A * B} + ${A}a – ${C}`, rhs: `–${D}a` },
+                        { lhs: `${A}a – ${A * B + C}`, rhs: `–${D}a` },
+                        { lhs: `${A}a + ${D}a`, rhs: `${A * B + C}` },
+                        { lhs: `${A + D}a`, rhs: `${A * B + C}` },
+                        { lhs: `a`, rhs: `${answer}` }
+                    ];
+                }
+            }
+
+            return {
+                diff,
+                cardName,
+                titleClass,
+                rewardText,
+                equationHTML,
+                answer,
+                hintStep1,
+                steps,
+                options: generateOptions(answer)
+            };
         }
 
         function triggerMathEvent() {
             gameState = 'PAUSED_MATH';
-            generateMathProblem();
+            generateAllCards();
             mathModal.style.display = 'flex';
         }
 
-        function generateMathProblem() {
-            const type = Math.floor(Math.random() * 3);
-            let equation = "";
-            let answer = 0;
-            if (type === 0) { 
-                const a = Math.floor(Math.random() * 20) + 1;
-                answer = Math.floor(Math.random() * 20) + 1;
-                equation = `x + ${a} = ${answer + a}`;
-            } else if (type === 1) { 
-                const a = Math.floor(Math.random() * 9) + 2;
-                answer = Math.floor(Math.random() * 12) + 1;
-                equation = `${a}x = ${a * answer}`;
-            } else { 
-                const a = Math.floor(Math.random() * 5) + 2;
-                answer = Math.floor(Math.random() * 10) + 1;
-                const b = Math.floor(Math.random() * 15) + 1;
-                equation = `${a}x + ${b} = ${(a * answer) + b}`;
+        function generateAllCards() {
+            // 連續答錯 2 次，下次只出「學徒」題
+            if (consecutiveWrongAnswers >= 2) {
+                currentCardsData = [
+                    generateSingleCardData(1),
+                    generateSingleCardData(1),
+                    generateSingleCardData(1)
+                ];
+                document.getElementById('math-modal-desc').innerHTML = "<span style='color:#ff4444; font-weight:bold;'>連續答錯 2 次，本次只能選擇學徒卡！</span>";
+            } else {
+                currentCardsData = [
+                    generateSingleCardData(1),
+                    generateSingleCardData(2),
+                    generateSingleCardData(3)
+                ];
+                document.getElementById('math-modal-desc').textContent = "選擇一張題卡進入答題介面！";
             }
-
-            currentMathAnswer = answer;
-            mathEquation.textContent = equation;
-
-            let options = [answer];
-            while (options.length < 4) {
-                let offset = Math.floor(Math.random() * 9) - 4;
-                if (offset === 0) offset = 5;
-                let wrong = answer + offset;
-                if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
-            }
-            options.sort(() => Math.random() - 0.5);
-
-            mathOptions.innerHTML = '';
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.textContent = opt;
-                btn.onclick = () => handleMathAnswer(opt);
-                mathOptions.appendChild(btn);
-            });
+            renderMathCards();
         }
 
-        function handleMathAnswer(selectedOption) {
-            if (selectedOption === currentMathAnswer) {
-                arrowDamage += 30;
+        function renderMathCards() {
+            activeCardIndex = -1;
+            document.getElementById('cards-wrapper').style.display = 'grid';
+            document.getElementById('math-modal-desc').style.display = 'block';
+            document.getElementById('answer-wrapper').style.display = 'none';
+            document.getElementById('math-tools').style.display = 'none';
+
+            const wrapper = document.getElementById('cards-wrapper');
+            wrapper.innerHTML = '';
+
+            currentCardsData.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-box';
+                cardEl.style.cursor = 'pointer';
+                cardEl.onclick = () => selectCard(index);
+
+                cardEl.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title ${card.titleClass}" style="font-size: 1.35rem;">${card.cardName}</div>
+                    </div>
+                    <div class="card-reward">${card.rewardText}</div>
+                    <div style="text-align: center; margin-top: 10px; color: var(--gold); font-size: 0.95rem; font-weight: bold; animation: pulse 1.5s infinite;">點擊進入挑戰 ➔</div>
+                `;
+                wrapper.appendChild(cardEl);
+            });
+
+            updateToolButtons();
+        }
+
+        function selectCard(index) {
+            activeCardIndex = index;
+            document.getElementById('cards-wrapper').style.display = 'none';
+            document.getElementById('math-modal-desc').style.display = 'none';
+
+            const card = currentCardsData[index];
+            const answerWrapper = document.getElementById('answer-wrapper');
+
+            let optsHtml = card.options.map(opt => 
+                `<button class="card-opt-btn" style="padding: 12px; font-size: 1.6rem;" onclick="handleCardAnswer(${index}, ${opt})">${opt}</button>`
+            ).join('');
+
+            const isHero = (card.diff === 3);
+            const btnHint = document.getElementById('btn-hint');
+            if (btnHint) {
+                btnHint.style.display = (isHero || !card.hintStep1) ? 'none' : 'inline-block';
+            }
+
+            answerWrapper.innerHTML = `
+                <div class="card-title ${card.titleClass}" style="font-size: 1.8rem; margin-bottom: 8px;">${card.cardName}</div>
+                <div class="card-reward" style="font-size: 1rem; margin-bottom: 15px; padding: 8px 20px;">${card.rewardText}</div>
+                <div class="card-eq" style="font-size: 2.8rem; margin: 15px 0;">${card.equationHTML}</div>
+                <div class="card-hint" id="active-card-hint" style="font-size: 1.2rem; margin-bottom: 15px; display: none;">${card.hintStep1}</div>
+                <div class="card-options" style="width: 100%; max-width: 480px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    ${optsHtml}
+                </div>
+            `;
+
+            answerWrapper.style.display = 'flex';
+            document.getElementById('math-tools').style.display = 'flex';
+            updateToolButtons();
+        }
+
+        function useHint() {
+            if (activeCardIndex !== -1 && (currentCardsData[activeCardIndex].diff === 3 || !currentCardsData[activeCardIndex].hintStep1)) {
+                return; 
+            }
+            if (score >= HINT_COST && activeCardIndex !== -1) {
+                score -= HINT_COST;
+                updateUI();
+                const hBox = document.getElementById('active-card-hint');
+                if (hBox) hBox.style.display = 'flex';
+                showFloatingText(canvas.width/2, canvas.height/2 - 80, `-${HINT_COST} 數學幣`, "dmg-text");
+            }
+        }
+
+        function useReroll() {
+            if (score >= REROLL_COST && activeCardIndex !== -1) {
+                score -= REROLL_COST;
+                updateUI();
+                currentCardsData[activeCardIndex] = generateSingleCardData(currentCardsData[activeCardIndex].diff);
+                selectCard(activeCardIndex);
+                showFloatingText(canvas.width/2, canvas.height/2 - 80, `-${REROLL_COST} 數學幣`, "dmg-text");
+            }
+        }
+
+        function handleCardAnswer(cardIndex, selectedOption) {
+            if (window.isShowingAnswer) return;
+            const card = currentCardsData[cardIndex];
+
+            // 禁用按鈕，防止重複點擊
+            const optionBtns = document.querySelectorAll('.card-opt-btn');
+            optionBtns.forEach(btn => btn.disabled = true);
+            const toolBtns = document.querySelectorAll('.tool-btn');
+            toolBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedOption === card.answer) {
+                // 答對邏輯：重置連續答錯計數
+                consecutiveWrongAnswers = 0; 
+                if (card.diff === 3) {
+                    heroDefeated = true; // 觸發以後題型難度升級
+                }
+                
                 mathCombo++;
-                createParticles(canvas.width/2, canvas.height/2, '#ffd700', 100); 
+                addScore(200); 
+                createParticles(canvas.width/2, canvas.height/2, '#ffd700', 80);
+
+                if (card.diff === 1) { 
+                    arrowDamage += 30;
+                    showFloatingText(canvas.width/2, canvas.height/2 - 80, "傷害 +30!", "heal-text");
+                } else if (card.diff === 2) { 
+                    arrowDamage += 15;
+                    const rBuff = Math.floor(Math.random() * 3);
+                    if (rBuff === 0) { 
+                        critRate = Math.min(0.75, critRate + 0.08);
+                        showFloatingText(canvas.width/2, canvas.height/2 - 80, "傷害+15 & 暴擊率+8%!", "heal-text");
+                    } else if (rBuff === 1) { 
+                        knockbackPower += 25;
+                        showFloatingText(canvas.width/2, canvas.height/2 - 80, "傷害+15 & 擊退能力提升!", "heal-text");
+                    } else { 
+                        fireRateBonus += 0.12;
+                        showFloatingText(canvas.width/2, canvas.height/2 - 80, "傷害+15 & 射速+12%!", "heal-text");
+                    }
+                } else if (card.diff === 3) { 
+                    const chooseSplit = (splitLevel < 3 && Math.random() < 0.5) || (pierceLevel >= 7);
+                    if (chooseSplit && splitLevel < 3) {
+                        splitLevel++;
+                        const arrowCnt = splitLevel === 1 ? 2 : (splitLevel === 2 ? 3 : 5);
+                        showFloatingText(canvas.width/2, canvas.height/2 - 80, `分裂箭 Lv.${splitLevel} (總箭數: ${arrowCnt})!`, "heal-text");
+                    } else {
+                        pierceLevel++;
+                        if (pierceLevel <= 3) {
+                            showFloatingText(canvas.width/2, canvas.height/2 - 80, `穿透 Lv.${pierceLevel} (可穿透 ${pierceLevel} 隻)!`, "heal-text");
+                        } else {
+                            const curDecay = Math.max(0, 20 - (pierceLevel - 3) * 5);
+                            showFloatingText(canvas.width/2, canvas.height/2 - 80, `穿透強化！衰減降至 ${curDecay}%!`, "heal-text");
+                        }
+                    }
+                }
+
                 if (mathCombo >= 3) {
                     skillCharges++;
                     mathCombo = 0;
-                    showFloatingText(canvas.width/2, canvas.height/2 - 50, "技能解鎖!", "heal-text");
+                    showFloatingText(canvas.width/2, canvas.height/2 - 40, "清屏技能解鎖!", "heal-text");
                 }
+
                 setTimeout(() => {
-                    if (gameState === 'PLAYING') {
+                    if (gameState === 'PLAYING' || gameState === 'PAUSED_MATH') {
                         spawnRateMultiplier = 0.5; 
                         showFloatingText(canvas.width/2, canvas.height/2, "怪物大軍加速湧出！", "dmg-text");
                         setTimeout(() => { spawnRateMultiplier = 1.0; baseSpawnRateBonus += 400; }, 5000);
                     }
                 }, 2000);
                 mathTimer = 0; 
+                
+                closeMathModalAndResume();
             } else {
+                // 答錯邏輯
+                consecutiveWrongAnswers++; 
                 mathCombo = 0; 
                 createParticles(canvas.width/2, canvas.height/2, '#555', 50);
                 enemySpeedMultiplier = 1.35; 
                 showFloatingText(canvas.width/2, canvas.height/2, "答錯！怪物狂暴加速！", "dmg-text");
                 setTimeout(() => { enemySpeedMultiplier = 1.0; }, 2000);
                 mathTimer = MATH_INTERVAL - 5000;
+                
+                window.isShowingAnswer = true;
+                
+                const answerWrapper = document.getElementById('answer-wrapper');
+                const optionsGrid = answerWrapper.querySelector('.card-options');
+                if (optionsGrid) optionsGrid.style.display = 'none';
+                document.getElementById('math-tools').style.display = 'none';
+                
+                // 產生垂直對齊等於符號的解法 HTML
+                const solutionRows = card.steps.map(step => 
+                    `<div class="sol-lhs">${step.lhs}</div><div class="sol-eq">=</div><div class="sol-rhs">${step.rhs}</div>`
+                ).join('');
+
+                answerWrapper.innerHTML += `
+                    <div style="margin-top: 15px; background: rgba(255,0,0,0.15); border: 2px solid #ff4444; padding: 15px; border-radius: 8px; width: 100%; max-width: 650px; text-align: center;">
+                        <h3 style="color: #ff4444; margin: 0 0 10px 0; font-size: 1.4rem;">答錯了！</h3>
+                        <p style="font-size: 1.1rem; color: #fff; margin: 0 0 10px 0;">正確解法：</p>
+                        <div class="solution-grid">
+                            ${solutionRows}
+                        </div>
+                    </div>
+                `;
+                
+                // 停留 5 秒後自動關閉彈窗並恢復遊戲
+                setTimeout(() => {
+                    window.isShowingAnswer = false;
+                    closeMathModalAndResume();
+                }, 5000);
             }
+        }
+        
+        function closeMathModalAndResume() {
             updateUI();
             mathModal.style.display = 'none';
             gameState = 'PLAYING';
@@ -1286,7 +2103,6 @@
         }
 
         function drawBackground() {
-            // 末世赤紅天際夜空
             const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             skyGrad.addColorStop(0, '#0a0307');
             skyGrad.addColorStop(0.4, '#240810');
@@ -1295,7 +2111,6 @@
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 廢土血月 (Blood Moon)
             ctx.save();
             ctx.shadowColor = '#ff2200';
             ctx.shadowBlur = 35;
@@ -1309,13 +2124,11 @@
             ctx.fill();
             ctx.restore();
 
-            // 月球隕石坑細節
             ctx.fillStyle = 'rgba(40, 0, 0, 0.4)';
             ctx.beginPath(); ctx.arc(195, 95, 18, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(250, 135, 25, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(210, 150, 14, 0, Math.PI*2); ctx.fill();
 
-            // 遠景：殘破城市與尖塔廢墟剪影
             ctx.fillStyle = '#14060a';
             ctx.beginPath();
             ctx.moveTo(0, canvas.height - 130);
@@ -1328,7 +2141,6 @@
             ctx.lineTo(0, canvas.height);
             ctx.fill();
 
-            // 中景濃煙與迷霧層
             const fogGrad = ctx.createLinearGradient(0, 280, 0, canvas.height - 120);
             fogGrad.addColorStop(0, 'rgba(80, 20, 20, 0)');
             fogGrad.addColorStop(0.6, 'rgba(120, 30, 25, 0.25)');
@@ -1336,7 +2148,6 @@
             ctx.fillStyle = fogGrad;
             ctx.fillRect(0, 280, canvas.width, canvas.height - 280);
 
-            // 地面：裂谷與荒漠
             ctx.fillStyle = '#1c1517';
             ctx.beginPath();
             ctx.moveTo(0, canvas.height - 140);
@@ -1346,7 +2157,6 @@
             ctx.lineTo(0, canvas.height);
             ctx.fill();
 
-            // 地裂岩漿紋路
             ctx.strokeStyle = '#ff3300';
             ctx.shadowColor = '#ff5500';
             ctx.shadowBlur = 8;
@@ -1374,11 +2184,9 @@
                 ctx.translate(g.x, g.y);
                 ctx.rotate(g.tilt);
 
-                // 墓碑陰影
                 ctx.fillStyle = 'rgba(0,0,0,0.5)';
                 ctx.fillRect(-g.w/2 + 5, -5, g.w, 10);
 
-                // 石頭紋理
                 const stoneGrad = ctx.createLinearGradient(-g.w/2, 0, g.w/2, 0);
                 stoneGrad.addColorStop(0, '#3a3a3d');
                 stoneGrad.addColorStop(0.5, '#545458');
@@ -1397,7 +2205,6 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                // 雕刻十字/符文
                 ctx.strokeStyle = g.glow ? '#ff3300' : '#222';
                 if(g.glow) { ctx.shadowColor = '#ff3300'; ctx.shadowBlur = 6; }
                 ctx.lineWidth = 2;
@@ -1410,7 +2217,6 @@
                 ctx.restore();
             });
 
-            // 殘破枯木
             ctx.strokeStyle = '#151112';
             ctx.lineWidth = 4;
             ctx.beginPath();
@@ -1430,13 +2236,11 @@
 
             ctx.save();
 
-            // 城堡塔投影
             ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.beginPath();
             ctx.ellipse(towerLeft + towerWidth/2 + 30, canvas.height - 20, 120, 30, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 1. 塔身漸層石磚與鋼鐵材質
             const wallGrad = ctx.createLinearGradient(towerLeft, 0, towerRight, 0);
             wallGrad.addColorStop(0, '#1c1b22');
             wallGrad.addColorStop(0.25, '#3d3b45');
@@ -1446,12 +2250,10 @@
             ctx.fillStyle = wallGrad;
             ctx.fillRect(towerLeft, baseY, towerWidth, canvas.height - baseY);
 
-            // 塔外邊線
             ctx.strokeStyle = '#0a0a0d';
             ctx.lineWidth = 3;
             ctx.strokeRect(towerLeft, baseY, towerWidth, canvas.height - baseY);
 
-            // 石磚分割線條
             ctx.strokeStyle = 'rgba(10, 10, 15, 0.6)';
             ctx.lineWidth = 1.5;
             const rowHeight = 22;
@@ -1470,7 +2272,6 @@
                 }
             }
 
-            // 鉚釘鋼鐵加固帶
             const bandYPositions = [baseY + 90, baseY + 190, baseY + 290];
             bandYPositions.forEach(by => {
                 ctx.fillStyle = '#222328';
@@ -1486,7 +2287,6 @@
                 }
             });
 
-            // 赤紅箭縫窗戶 (Arrow Slits)
             const windowPositions = [{x: towerLeft + 45, y: baseY + 120}, {x: towerLeft + 135, y: baseY + 120}, {x: towerLeft + 90, y: baseY + 220}];
             windowPositions.forEach(w => {
                 ctx.save();
@@ -1503,7 +2303,6 @@
                 ctx.restore();
             });
 
-            // 2. 塔頂齒牆 (Battlements & Spikes)
             const merlonWidth = 26;
             const merlonHeight = 32;
             const merlonGap = 12;
@@ -1524,7 +2323,6 @@
                 ctx.fillRect(mx, baseY - merlonHeight - 4, merlonWidth, merlonHeight);
                 ctx.strokeRect(mx, baseY - merlonHeight - 4, merlonWidth, merlonHeight);
 
-                // 尖刺鐵防禦
                 ctx.fillStyle = '#222';
                 ctx.beginPath();
                 ctx.moveTo(mx + 4, baseY - merlonHeight - 4);
@@ -1535,11 +2333,9 @@
                 ctx.stroke();
             }
 
-            // 頂端動態火焰火炬
             drawTorch(ctx, towerLeft - 5, baseY - 12);
             drawTorch(ctx, towerRight + 5, baseY - 12);
 
-            // 3. 城堡底部黑鐵拱門 (Castle Gate)
             const archX = towerLeft + towerWidth / 2;
             const archY = canvas.height - 100;
             const archRadius = 38;
@@ -1561,7 +2357,6 @@
             ctx.lineTo(archX - archRadius, canvas.height);
             ctx.fill();
 
-            // 鐵柵門 (Portcullis)
             ctx.strokeStyle = '#44424a';
             ctx.lineWidth = 3;
             for (let gx = archX - archRadius + 8; gx < archX + archRadius; gx += 12) {
@@ -1577,7 +2372,6 @@
                 ctx.stroke();
             }
 
-            // 門縫透出的赤紅地熱光
             ctx.save();
             ctx.shadowColor = '#ff2200';
             ctx.shadowBlur = 20;
@@ -1624,13 +2418,11 @@
 
             const isFiring = fireTimer < 100;
 
-            // 腳下陰影
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.beginPath();
             ctx.ellipse(0, 22, 16, 6, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 1. 飄逸的暗紅破損斗篷 (Crimson Cloak)
             ctx.fillStyle = '#3b0d11'; 
             ctx.strokeStyle = '#120406';
             ctx.lineWidth = 1.5;
@@ -1643,7 +2435,6 @@
             ctx.fill();
             ctx.stroke();
 
-            // 2. 雙腿與戰術鋼靴
             ctx.fillStyle = '#1c1c24'; 
             ctx.fillRect(-8, 5, 6, 16);
             ctx.fillRect(2, 5, 6, 16);
@@ -1652,7 +2443,6 @@
             ctx.fillRect(-9, 17, 8, 7);
             ctx.fillRect(1, 17, 8, 7);
 
-            // 3. 背部皮革箭筒與發光箭矢
             ctx.save();
             ctx.rotate(-0.3);
             ctx.fillStyle = '#4a3324'; 
@@ -1672,7 +2462,6 @@
             }
             ctx.restore();
 
-            // 4. 軀幹與護甲胸背背帶
             ctx.fillStyle = '#2d2d38'; 
             ctx.beginPath();
             ctx.moveTo(-10, -15);
@@ -1694,29 +2483,24 @@
             ctx.fillStyle = '#d4af37';
             ctx.fillRect(-3, 3, 6, 6);
 
-            // 左金屬肩甲
             ctx.fillStyle = '#555660';
             ctx.beginPath(); ctx.arc(-10, -14, 6, 0, Math.PI*2); ctx.fill();
             ctx.strokeStyle = '#111'; ctx.lineWidth = 1; ctx.stroke();
 
-            // 5. 隨瞄準旋轉的手臂與廢土複合弓 (Composite Energy Bow)
             ctx.save();
             ctx.translate(0, -10); 
             ctx.rotate(angle);
 
-            // 後手臂 (拉弦手)
             ctx.fillStyle = '#2d2d38';
             ctx.fillRect(-12, -3, 12, 6);
             ctx.fillStyle = '#111'; 
             ctx.beginPath(); ctx.arc(-12, 0, 3.5, 0, Math.PI*2); ctx.fill();
 
-            // 前手臂 (握弓手)
             ctx.fillStyle = '#3a3a47';
             ctx.fillRect(0, -3, 20, 6);
             ctx.fillStyle = '#111'; 
             ctx.beginPath(); ctx.arc(20, 0, 4, 0, Math.PI*2); ctx.fill();
 
-            // 複合弓體與動態能量弦
             ctx.save();
             ctx.translate(20, 0); 
 
@@ -1737,7 +2521,6 @@
             ctx.beginPath(); ctx.arc(-6, -42, 3.5, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(-6, 42, 3.5, 0, Math.PI*2); ctx.fill();
 
-            // 發光能量弓弦
             ctx.strokeStyle = '#00ffff'; 
             ctx.shadowColor = '#00ffff';
             ctx.shadowBlur = 10;
@@ -1751,7 +2534,6 @@
             ctx.lineTo(-6, 42);
             ctx.stroke();
 
-            // 待射擊箭矢
             ctx.fillStyle = '#8b5a2b'; 
             ctx.fillRect(pullBack, -1.5, 32, 3);
             ctx.fillStyle = '#ff2200'; 
@@ -1767,7 +2549,6 @@
             ctx.restore(); 
             ctx.restore(); 
 
-            // 6. 兜帽與發光紅眼 (Crimson Hood & Glowing Eyes)
             ctx.fillStyle = '#5a1820'; 
             ctx.beginPath();
             ctx.arc(0, -22, 11, Math.PI * 0.8, Math.PI * 2.2);
@@ -1816,9 +2597,33 @@
             const archerX = 140;
             const archerY = canvas.height - 400;
 
-            if (fireTimer >= fireRate) {
+            const currentFireRate = fireRate / (1 + fireRateBonus);
+            if (fireTimer >= currentFireRate) {
                 if (mouseX > archerX - 50) {
-                    arrows.push(new Arrow(archerX, archerY - 5, mouseX, mouseY));
+                    let arrowAngles = [0];
+                    if (splitLevel === 1) arrowAngles = [-0.08, 0.08];
+                    else if (splitLevel === 2) arrowAngles = [-0.12, 0, 0.12];
+                    else if (splitLevel >= 3) arrowAngles = [-0.20, -0.10, 0, 0.10, 0.20];
+
+                    const baseAngle = Math.atan2(mouseY - (archerY - 5), mouseX - archerX);
+
+                    let maxPierce = 0;
+                    if (pierceLevel === 1) maxPierce = 1;
+                    else if (pierceLevel === 2) maxPierce = 2;
+                    else if (pierceLevel >= 3) maxPierce = 3;
+
+                    let decayRate = 0.20;
+                    if (pierceLevel > 3) {
+                        decayRate = Math.max(0, 0.20 - (pierceLevel - 3) * 0.05);
+                    }
+
+                    arrowAngles.forEach(offset => {
+                        const angle = baseAngle + offset;
+                        const targetX = archerX + Math.cos(angle) * 1000;
+                        const targetY = (archerY - 5) + Math.sin(angle) * 1000;
+                        arrows.push(new Arrow(archerX, archerY - 5, targetX, targetY, maxPierce, decayRate));
+                    });
+
                     playShootSound();
                     fireTimer = 0;
                 }
@@ -1830,25 +2635,42 @@
 
             for (let i = arrows.length - 1; i >= 0; i--) {
                 const a = arrows[i];
-                let hit = false;
 
                 for (let j = enemies.length - 1; j >= 0; j--) {
                     const e = enemies[j];
-                    const eLeft = e.x - e.width/2;
-                    const eRight = e.x + e.width/2;
-                    const eTop = e.y - (e.type === 'dragon' ? e.height/2 : e.height);
-                    const eBottom = e.y + (e.type === 'dragon' ? e.height/2 : 0);
+                    if (!e.active || a.hitEnemies.has(e)) continue;
 
-                    if (a.x >= eLeft && a.x <= eRight && a.y >= eTop && a.y <= eBottom) {
-                        e.hp -= a.damage;
+                    let eLeft, eRight, eTop, eBottom;
+                    if (e.type === 'dragon') {
+                        eLeft = e.x - 35; eRight = e.x + 35; eTop = e.y - 45; eBottom = e.y + 35;
+                    } else if (e.type === 'elite') {
+                        eLeft = e.x - 35; eRight = e.x + 35; eTop = e.y - 120; eBottom = e.y + 30;
+                    } else {
+                        eLeft = e.x - 30; eRight = e.x + 30; eTop = e.y - 110; eBottom = e.y + 25;
+                    }
+
+                    if (segmentIntersectsAABB(a.prevX, a.prevY, a.x, a.y, eLeft, eRight, eTop, eBottom)) {
+                        a.hitEnemies.add(e);
+                        a.hitsCount++;
+
+                        let currentDmg = a.damage * Math.pow(1 - a.decayRate, a.hitsCount - 1);
+                        let isCrit = Math.random() < critRate;
+                        if (isCrit) currentDmg *= 1.8;
+                        currentDmg = Math.max(1, Math.round(currentDmg));
+
+                        e.hp -= currentDmg;
                         playHitSound();
-                        showFloatingText(e.x, e.y - 20, `-${a.damage}`);
+
+                        if (knockbackPower > 0 && e.x < canvas.width - 20) {
+                            e.x += knockbackPower;
+                        }
+
+                        showFloatingText(e.x, e.y - 20, `-${currentDmg}${isCrit ? ' 暴擊!' : ''}`, isCrit ? "heal-text" : "dmg-text");
                         
                         let pColor = '#8fa362';
                         if (e.type === 'dragon') pColor = '#00e5ff'; 
                         if (e.type === 'elite') pColor = '#8a6bb0';
-                        createParticles(a.x, a.y, pColor, 12); 
-                        hit = true;
+                        createParticles(a.x, a.y, pColor, 12);
 
                         if (e.hp <= 0) {
                             let pts = 100;
@@ -1859,15 +2681,18 @@
                             createParticles(e.x, e.y - (e.type==='dragon'?0:e.height/2), pColor, 30);
                             e.active = false;
                         }
-                        break; 
+
+                        if (a.hitsCount > a.maxPierce) {
+                            a.active = false;
+                            break;
+                        }
                     }
                 }
                 
                 if (a.y > canvas.height - 100 && a.active) {
-                    hit = true;
+                    a.active = false;
                     createParticles(a.x, a.y, '#666', 8); 
                 }
-                if (hit) a.active = false;
             }
 
             arrows = arrows.filter(a => a.active);
@@ -1903,6 +2728,8 @@
         function resetGame() {
             sysModal.style.display = 'none';
             mathModal.style.display = 'none';
+            document.getElementById('dev-modal').style.display = 'none';
+            devPanelOpen = false;
             
             gameState = 'PLAYING';
             score = 0;
@@ -1911,7 +2738,18 @@
             mathCombo = 0;
             skillCharges = 0;
             
+            // 重置挑戰狀態與標誌
+            consecutiveWrongAnswers = 0;
+            heroDefeated = false;
+            window.isShowingAnswer = false;
+            
             arrowDamage = 20; 
+            critRate = 0.0;
+            knockbackPower = 0;
+            fireRateBonus = 0.0;
+            splitLevel = 0;
+            pierceLevel = 0;
+
             arrows = [];
             enemies = [];
             particles = [];
